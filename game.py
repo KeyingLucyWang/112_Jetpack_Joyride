@@ -22,7 +22,7 @@ class Game(PygameGame):
         #Laser.in it()
         #self.lasers = pygame.sprite.Group()
         pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(4000, 5500))
-        
+
     def redrawAll(self, screen):
         if not self.playerGroup.sprite.isAlive:
             screen.fill((0, 0, 0))
