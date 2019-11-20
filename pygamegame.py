@@ -1,18 +1,4 @@
-'''
-pygamegame.py
-created by Lukas Peraza
- for 15-112 F15 Pygame Optional Lecture, 11/11/15
-
-use this code in your term project if you want
-- CITE IT
-- you can modify it to your liking
-  - BUT STILL CITE IT
-
-- you should remove the print calls from any function you aren't using
-- you might want to move the pygame.display.flip() to your redrawAll function,
-    in case you don't need to update the entire display every frame (then you
-    should use pygame.display.update(Rect) instead)
-'''
+# modified code taken from: http://blog.lukasperaza.com/getting-started-with-pygame/
 import pygame
 import random
 from Laser import Laser
@@ -23,7 +9,7 @@ class PygameGame(object):
         Laser.init()
         self.lasers = pygame.sprite.Group()
         pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(2000, 3500))
-
+        
     def mousePressed(self, x, y):
         pass
 
@@ -58,8 +44,9 @@ class PygameGame(object):
         self.fps = fps
         self.title = title
         #self.bgColor = (255, 255, 255)
+        self.mode = "start"
         pygame.init()
-
+    
     def run(self):
 
         clock = pygame.time.Clock()
@@ -89,6 +76,7 @@ class PygameGame(object):
                     self.mouseDrag(*(event.pos))
                 elif event.type == pygame.KEYDOWN:
                     self._keys[event.key] = True
+                    self.mode = "game"
                     self.keyPressed(event.key, event.mod)
                 elif event.type == pygame.KEYUP:
                     self._keys[event.key] = False

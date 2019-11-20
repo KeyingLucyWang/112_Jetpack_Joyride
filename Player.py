@@ -26,12 +26,26 @@ class Player(GameObject):
         self.angle = 0
         self.timeAlive = 0
         self.isAlive = True
+        self.acceleration = (0, 9.8) #accounts for gravity
+        self.velocity = (0, 0)
+        self.t = 1/30
 
     def update(self, dt, keysDown, screenWidth, screenHeight):
         self.timeAlive += dt
         Player.count += 1
         Player.image = Player.fly[Player.count % 8]
-        if keysDown(pygame.K_UP):
+        ax, ay = self.acceleration
+        vx, vy = self.velocity
+        dt = dt / 1000
+        if keysDown(pygame.K_UP) and ay == 9.8:
+            ay -= 20
+            #self.y = vy * self.timeAlive + 0/5 * ay * (self.timeAlive**2)
+            vy = -3 + ay * dt
+            self.y = self.y + vy * dt *2
+            self.velocity = (vx, vy)
+            self.acceleration = (ax, ay)
+            #print("velocity", self.velocity,
+            #      "acceleration", self.acceleration)
             '''
             self.powerUp = True
             self.counter = 20
@@ -49,7 +63,7 @@ class Player(GameObject):
                 elif self.counter > 0 and self.counter < 1 / 1000:
                     self.counter = -self.counter
             '''
-            self.y -= 20
+            #self.y -= 30
             if self.y - self.height / 2 < 0:
                 self.y = self.height / 2
             #self.y -= 5
@@ -72,7 +86,14 @@ class Player(GameObject):
             #super(Player, self).update(screenWidth, screenHeight, Player.image)
         #elif keysDown(pygame.K_DOWN):
         if not self.powerUp:
-            self.y += 5
+            self.y = self.y + vy * dt
+            vy = vy + ay * dt
+            if ay < 9.8:
+                ay += 1
+            if ay > 9.8:
+                ay = 9.8
+            self.velocity = (vx, vy)
+            self.acceleration = (ax, ay)
             if self.y + self.height / 2 > screenHeight:
                 self.isAlive = False
         super(Player, self).update(screenWidth, screenHeight, Player.image)
