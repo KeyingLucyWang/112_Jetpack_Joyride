@@ -2,14 +2,15 @@ import pygame
 import random
 from pygamegame import PygameGame
 from Player import Player
-from Laser import Laser
+from Obstacles import Obstacles
+from Hitboxes import Hitboxes
   
 class Game(PygameGame):
     def init(self):
         super().init()
-        Player.init()
-        player = Player(self.width / 2, self.height / 2)
-        self.playerGroup = pygame.sprite.GroupSingle(player)
+        #Player.init()
+        #player = Player(self.width / 2, self.height / 2)
+        #self.playerGroup = pygame.sprite.GroupSingle(player)
         self.bg = pygame.image.load("mountain.png")
         #self.bg = pygame.transform.scale(self.bg, (400, 400))
         self.bgWidth = self.bg.get_width()
@@ -46,6 +47,7 @@ class Game(PygameGame):
             insRect = ins.get_rect()
             insRect.center = (self.width / 2, self.height / 2)
             screen.blit(ins, insRect)
+            pygame.display.update()
 
         if self.isPaused:
             screen.fill((255, 255, 255))
@@ -58,14 +60,17 @@ class Game(PygameGame):
             pauseInsRect.center = (self.width / 2, self.height / 2)
             screen.blit(pause, pauseRect)
             screen.blit(pauseIns, pauseInsRect)
+            pygame.display.update()
             
         elif self.mode == "game": 
             screen.blit(self.bg, (self.bgX, 0))
             screen.blit(self.bg, (self.bgX2, 0))
             #self.timerFired()
             self.playerGroup.draw(screen)
-            self.lasers.draw(screen)
-            pygame.display.update()
+            self.obstacles.draw(screen)
+            for hitbox in self.hitboxes:
+                hitbox.draw(screen)
+            #pygame.display.update()
 
         pygame.display.update()
         
@@ -79,11 +84,16 @@ class Game(PygameGame):
             self.bgX = self.bgWidth
         elif self.bgX2 < (self.bgWidth * -1):
             self.bgX2 = self.bgWidth
-        for laser in self.lasers:
+        for laser in self.obstacles:
             laser.x -= self.scrollSpeed
         self.playerGroup.update(dt, self.isKeyPressed, self.width, self.height)
-        self.lasers.update(self.width, self.height)
-
+        self.obstacles.update(self.width, self.height)
+        (bools, obstacle) = self.player.collide(self.obstacles)
+        #print(bools)
+        if obstacle != None:
+            self.player.isAlive = False
+            print(f"collide with {obstacle}")
+            
     def keyPressed(self, keyCode, modifier):
         #print(keyCode)
         if keyCode == 114: #keyCode for "r" --> restart

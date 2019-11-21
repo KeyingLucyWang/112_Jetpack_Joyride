@@ -1,14 +1,19 @@
 # modified code taken from: http://blog.lukasperaza.com/getting-started-with-pygame/
 import pygame
 import random
-from Laser import Laser
+from Player import Player
+from Obstacles import Obstacles
+from Hitboxes import Hitboxes
 
 class PygameGame(object):
 
     def init(self):
-        Laser.init()
-        self.lasers = pygame.sprite.Group()
+        Obstacles.init()
+        self.obstacles = pygame.sprite.Group()
         pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(2000, 3500))
+        Player.init()
+        self.player = Player(self.width / 2, self.height / 2)
+        self.playerGroup = pygame.sprite.GroupSingle(self.player)
         
     def mousePressed(self, x, y):
         pass
@@ -38,13 +43,15 @@ class PygameGame(object):
         ''' return whether a specific key is being held '''
         return self._keys.get(key, False)
 
-    def __init__(self, width=600, height=400, fps=100, title="112 Jetpack Joyride"):
+    def __init__(self, width=600, height=400, fps=60, title="112 Jetpack Joyride"):
         self.width = width
         self.height = height
         self.fps = fps
         self.title = title
         #self.bgColor = (255, 255, 255)
         self.mode = "start"
+        self.obstaclesLst = []
+        self.hitboxes = []
         pygame.init()
     
     def run(self):
@@ -84,9 +91,24 @@ class PygameGame(object):
                 elif event.type == pygame.QUIT:
                     playing = False
                 elif event.type == pygame.USEREVENT+1:
-                    x = random.randint(self.width, self.width * 2)
-                    y = random.randint(50, self.height - 50)
-                    self.lasers.add(Laser(x, y))
+                    if len(self.obstaclesLst) == 0:
+                        x = random.randint(self.width, self.width * 2)
+                        y = random.randint(50, self.height - 50)
+                    else:
+                        maxX = 0
+                        for obstacle in self.obstaclesLst:
+                            prevX, prevY = obstacle.x, obstacle.y
+                            if prevX > maxX:
+                                maxX = prevX
+                        x = random.randint(max(self.width / 2 + self.player.x,
+                                               maxX + 300),
+                                           max(self.width / 2 + self.player.x,
+                                               maxX + 700))
+                        y = random.randint(50, self.height - 50)
+                    currentObstacle = Obstacles(x, y)
+                    self.obstaclesLst.append(currentObstacle)
+                    self.obstacles.add(currentObstacle)
+                    self.hitboxes.append(currentObstacle.hitbox)
             #screen.fill(self.bgColor)
             self.redrawAll(screen)
             pygame.display.flip()
