@@ -3,17 +3,24 @@ import pygame
 import random
 from Player import Player
 from Obstacles import Obstacles
+from Coins import Coins
 from Hitboxes import Hitboxes
+from Stars import Stars
 
 class PygameGame(object):
 
     def init(self):
-        Obstacles.init()
         self.obstacles = pygame.sprite.Group()
         pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(2000, 3500))
         Player.init()
         self.player = Player(self.width / 2, self.height / 2)
         self.playerGroup = pygame.sprite.GroupSingle(self.player)
+        self.bulletGroup = pygame.sprite.GroupSingle(self.player.bullet)
+        Coins.init()
+        self.coins = pygame.sprite.Group()
+        Stars.init()
+        self.stars = pygame.sprite.Group()
+        
         
     def mousePressed(self, x, y):
         pass
@@ -51,7 +58,10 @@ class PygameGame(object):
         #self.bgColor = (255, 255, 255)
         self.mode = "start"
         self.obstaclesLst = []
-        self.hitboxes = []
+        self.obstacleHitboxes = []
+        self.coinsLst = []
+        self.coinsHitboxes = []
+        self.starsLst = []
         pygame.init()
     
     def run(self):
@@ -108,7 +118,28 @@ class PygameGame(object):
                     currentObstacle = Obstacles(x, y)
                     self.obstaclesLst.append(currentObstacle)
                     self.obstacles.add(currentObstacle)
-                    self.hitboxes.append(currentObstacle.hitbox)
+                    self.obstacleHitboxes.append(currentObstacle.hitbox)
+                elif event.type == pygame.USEREVENT+2:
+                    if len(self.coinsLst) == 0:
+                        x = random.randint(self.width, self.width * 2)
+                        y = random.randint(50, self.height - 50)
+                    else:
+                        maxX = 0
+                        for coin in self.coinsLst:
+                            prevX, prevY = coin.x, coin.y
+                            if prevX > maxX:
+                                maxX = prevX
+                        x = random.randint(max(self.width / 2 + self.player.x,
+                                               maxX + 200),
+                                           max(self.width / 2 + self.player.x,
+                                               maxX + 300))
+                        y = random.randint(50, self.height - 50)
+                    currentCoin = Coins(x, y)
+                    self.coinsLst.append(currentCoin)
+                    self.coins.add(currentCoin)
+                    self.coinsHitboxes.append(currentCoin.hitbox)
+                    self.stars.add(currentCoin.star)
+                    self.starsLst.append(currentCoin.star)
             #screen.fill(self.bgColor)
             self.redrawAll(screen)
             pygame.display.flip()

@@ -20,8 +20,5 @@ class GameObject(pygame.sprite.Sprite):
 
     def update(self, screenWidth, screenHeight, image):
         self.image = image
-        #vx, vy = self.velocity
-        #self.x += vx
-        #self.y += vy
         self.updateRect()
         

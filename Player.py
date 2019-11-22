@@ -1,6 +1,7 @@
 import pygame
 import math
 from gameObject import GameObject
+from Bullets import Bullets
 
 class Player(GameObject):
     @staticmethod
@@ -17,7 +18,12 @@ class Player(GameObject):
                       pygame.image.load("flying/a8.png")]
         for i in range(len(Player.fly)):
             Player.fly[i] = pygame.transform.scale(Player.fly[i],(60, 60))
-        Player.count = 0
+        Player.attack = [pygame.image.load("Attack/a1.png"),
+                         pygame.image.load("Attack/a2.png"),
+                         pygame.image.load("Attack/a3.png")]
+        for i in range(len(Player.attack)):
+            Player.attack[i] = pygame.transform.scale(Player.attack[i],(60, 60))
+        #Player.count = 0
         Player.image = Player.fly[0]
         Player.powerUp = False
         
@@ -31,22 +37,35 @@ class Player(GameObject):
         #self.t = 1/30
         self.powerUp = False
         self.goingUp = False
+        self.mode = "fly"
+        self.bullet = None
+        self.count = 0
 
     def update(self, dt, keysDown, screenWidth, screenHeight):
         self.timeAlive += dt
-        Player.count += 1
-        if self.goingUp:
-            #Player.count = Player.count % 2
-            Player.image = Player.fly[Player.count % 8]
-        elif Player.count % 2 == 0:
-            Player.image = Player.fly[(Player.count // 2) % 8]
+        if self.mode == "fly":
+            #print("fly mode entered", Player.count)
+            self.count += 1
+            if self.goingUp:
+                #Player.count = Player.count % 2
+                Player.image = Player.fly[self.count % 8]
+            elif self.count % 2 == 0:
+                Player.image = Player.fly[(self.count // 2) % 8]
+        elif self.mode == "attack":
+            #print("attack mode", self.count)
+            if self.count >= 2:
+                #print("switching back to fly", Player.count)
+                self.mode = "fly"
+                self.count = 0
+            Player.image = Player.attack[(self.count % 3)]
+            self.count += 1
         ax, ay = self.acceleration
         vx, vy = self.velocity
         dt1 = dt / 300
         dt2 = dt / 220
-        if keysDown(pygame.K_UP) and (not self.powerUp):
+        if self.mode == "fly" and keysDown(pygame.K_UP) and (not self.powerUp):
             self.goingUp = True
-            Player.count = 7
+            self.count = 7
             self.powerUp = True
             #ay -= 25
             #self.y = vy * self.timeAlive + 0/5 * ay * (self.timeAlive**2)
@@ -97,7 +116,8 @@ class Player(GameObject):
             self.powerUp = False
         if self.goingUp and vy >= 0:
             self.goingUp = False
-            Player.count *= 2
+            if self.mode == "fly":
+                self.count *= 2
         if self.y + self.height / 2 > screenHeight:
                 self.isAlive = False
         if self.y - self.height / 2 < 0:
@@ -112,15 +132,19 @@ class Player(GameObject):
         self.acceleration = (ax, ay)
         super(Player, self).update(screenWidth, screenHeight, Player.image)
 
-    def collide(self, obstacles):
-        for obstacle in obstacles:
-            (x0, y0, x1, y1) = obstacle.hitbox.cors
-            (i0, j0, i1, j1) = (self.x - self.width / 2, self.y - self.height / 2,
-                                self.x + self.width / 2, self.y + self.height / 2)
+    def collide(self, items):
+        for item in items:
+            (x0, y0, x1, y1) = item.hitbox.cors
+            (i0, j0, i1, j1) = (self.x - self.width / 2 + item.scroll,
+                                self.y - self.height / 2,
+                                self.x + self.width / 2 + item.scroll,
+                                self.y + self.height / 2)
             #print((x0, y0, x1, y1),
             #      (j0, j0, i1, j1))
             if ((i0 <= x1) and (x0 <= i1)) and ((y0 <= j1) and (j0 <= y1)):
-                return True, hitbox
+                print((x0, y0, x1, y1),
+                      (i0, j0, i1, j1))
+                return True, item
         return False, None
 
 '''
