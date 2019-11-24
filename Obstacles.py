@@ -14,6 +14,7 @@ class Obstacles(GameObject):
         width, height = self.image.get_size()
         self.hitbox = Hitboxes(x, y, width, height, "obstacles")
         self.scroll = 0
+        self.scrollY = 0
         super(Obstacles, self).__init__(x, y, self.image)
 
     def update(self, screenWidth, screenHeight):

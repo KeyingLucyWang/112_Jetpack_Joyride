@@ -8,6 +8,8 @@ class Hitboxes(object):
         self.y = y
         self.w = w
         self.h = h
+        self.image = pygame.transform.scale(pygame.image.load("item box.png").convert_alpha(),
+                                            (20, 20))
         self.itemClass = itemClass
         if itemClass == "coins":
             self.cors = ((self.x - self.w / 2, self.y - self.h / 2,
@@ -15,10 +17,21 @@ class Hitboxes(object):
         elif itemClass == "obstacles":
             self.cors = (self.x - self.w / 2 + 35, self.y - self.h / 2 + 55,
                          self.x + self.w / 2 - 35, self.y + self.h / 2 - 55)
+        elif itemClass == "item boxes":
+            self.cors = ((self.x - self.w / 2, self.y - self.h / 2,
+                          self.x + self.w / 2, self.y + self.h / 2))
+        #super(Hitboxes, self).__init__(x, y, self.image)
 
     def update(self, screenWidth, screenHeight):
-        pass
+        if self.itemClass == "coins":
+            self.cors = ((self.x - self.w / 2, self.y - self.h / 2,
+                          self.x + self.w / 2, self.y + self.h / 2))
+        elif self.itemClass == "obstacles":
+            self.cors = (self.x - self.w / 2 + 35, self.y - self.h / 2 + 55,
+                         self.x + self.w / 2 - 35, self.y + self.h / 2 - 55)
+        elif self.itemClass == "item boxes":
+            self.cors = ((self.x - self.w / 2, self.y - self.h / 2,
+                          self.x + self.w / 2, self.y + self.h / 2))
+        #super(Hitboxes, self).update(screenWidth, screenHeight, self.image)
     
-    def draw(self, screen):
-        pass
     

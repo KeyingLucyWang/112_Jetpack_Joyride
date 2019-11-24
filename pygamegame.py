@@ -5,7 +5,8 @@ from Player import Player
 from Obstacles import Obstacles
 from Coins import Coins
 from Hitboxes import Hitboxes
-from Stars import Stars
+#from Stars import Stars
+from ItemBoxes import ItemBoxes
 
 class PygameGame(object):
 
@@ -16,11 +17,13 @@ class PygameGame(object):
         self.player = Player(self.width / 2, self.height / 2)
         self.playerGroup = pygame.sprite.GroupSingle(self.player)
         self.bulletGroup = pygame.sprite.GroupSingle(self.player.bullet)
+        self.magnetGroup = pygame.sprite.GroupSingle(self.player.magnet)
         Coins.init()
         self.coins = pygame.sprite.Group()
-        Stars.init()
-        self.stars = pygame.sprite.Group()
-        
+        #self.hitboxes = pygame.sprite.Group()
+        #Stars.init()
+        #self.stars = pygame.sprite.Group()
+        self.itemBoxes = pygame.sprite.Group()
         
     def mousePressed(self, x, y):
         pass
@@ -55,13 +58,18 @@ class PygameGame(object):
         self.height = height
         self.fps = fps
         self.title = title
-        #self.bgColor = (255, 255, 255)
         self.mode = "start"
+        
         self.obstaclesLst = []
         self.obstacleHitboxes = []
+        
         self.coinsLst = []
         self.coinsHitboxes = []
-        self.starsLst = []
+        
+        #self.starsLst = []
+        
+        self.itemBoxesLst = []
+        self.itemBoxesHitBoxes = []
         pygame.init()
     
     def run(self):
@@ -126,7 +134,30 @@ class PygameGame(object):
                     else:
                         maxX = 0
                         for coin in self.coinsLst:
-                            prevX, prevY = coin.x, coin.y
+                            if not coin.isVisible:
+                                prevX, prevY = coin.x, coin.y
+                                if prevX > maxX:
+                                    maxX = prevX
+                            x = random.randint(max(self.width / 2 + self.player.x,
+                                                   maxX + 200),
+                                               max(self.width / 2 + self.player.x,
+                                                   maxX + 300))
+                            y = random.randint(50, self.height - 50)
+                    currentCoin = Coins(x, y)
+                    self.coinsLst.append(currentCoin)
+                    self.coins.add(currentCoin)
+                    self.coinsHitboxes.append(currentCoin.hitbox)
+                    #self.hitboxes.add(currentCoin.hitbox)
+                    #self.stars.add(currentCoin.star)
+                    #self.starsLst.append(currentCoin.star)
+                elif event.type == pygame.USEREVENT+3:
+                    if len(self.itemBoxesLst) == 0:
+                        x = random.randint(self.width, self.width * 2)
+                        y = random.randint(50, self.height - 50)
+                    else:
+                        maxX = 0
+                        for itemBox in self.itemBoxesLst:
+                            prevX, prevY = itemBox.x, itemBox.y
                             if prevX > maxX:
                                 maxX = prevX
                         x = random.randint(max(self.width / 2 + self.player.x,
@@ -134,13 +165,11 @@ class PygameGame(object):
                                            max(self.width / 2 + self.player.x,
                                                maxX + 300))
                         y = random.randint(50, self.height - 50)
-                    currentCoin = Coins(x, y)
-                    self.coinsLst.append(currentCoin)
-                    self.coins.add(currentCoin)
-                    self.coinsHitboxes.append(currentCoin.hitbox)
-                    self.stars.add(currentCoin.star)
-                    self.starsLst.append(currentCoin.star)
-            #screen.fill(self.bgColor)
+                    itemType = random.choice(["invincible", "magnet suit"])
+                    currentItemBox = ItemBoxes(x, y, itemType)
+                    self.itemBoxesLst.append(currentItemBox)
+                    self.itemBoxes.add(currentItemBox)
+                    self.itemBoxesHitBoxes.append(currentItemBox.hitbox)
             self.redrawAll(screen)
             pygame.display.flip()
 

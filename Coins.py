@@ -2,7 +2,7 @@ import pygame
 import math
 from gameObject import GameObject
 from Hitboxes import Hitboxes
-from Stars import Stars
+#from Stars import Stars
 
 class Coins(GameObject):
     @staticmethod
@@ -13,6 +13,13 @@ class Coins(GameObject):
                         pygame.image.load("coins/coin4.png"),
                         pygame.image.load("coins/coin5.png"),
                         pygame.image.load("coins/coin6.png")]
+        Coins.starSprite = [pygame.transform.scale(pygame.image.load("stars.png"),
+                                                   (20, 20)),
+                            pygame.transform.scale(pygame.image.load("stars.png"),
+                                                   (15, 15)),
+                            pygame.transform.scale(pygame.image.load("stars.png"),
+                                                   (10, 10))]
+        
         for i in range(len(Coins.sprite)):
             Coins.sprite[i] = pygame.transform.scale(Coins.sprite[i], (30, 30))
         Coins.count = 0
@@ -25,11 +32,36 @@ class Coins(GameObject):
         width, height = self.image.get_size()
         self.hitbox = Hitboxes(x, y, width, height, "coins")
         self.scroll = 0
+        self.scrollY = 0
         self.hit = False
-        self.star = Stars(x + self.scroll, y)
+        self.count = 0
+        self.isVisible = False
+        #self.star = Stars(x + self.scroll, y)
         super(Coins, self).__init__(x, y, self.image)
 
-    def update(self, screenWidth, screenHeight):
-        self.image = Coins.sprite[Coins.count % 6]
-        Coins.count += 1
+    def update(self, screenWidth, screenHeight, playerX, playerY, playerMode):
+        if abs(self.x - playerX) <= screenWidth / 2:
+            self.isVisible = True
+        else:
+            self.isVisible = False
+        if self.hit:
+            if self.count > 2:
+                self.kill()
+            self.image = Coins.starSprite[self.count % 3]
+        else:
+            self.image = Coins.sprite[self.count % 6]
+        self.count += 1
+        if playerMode == "magnet suit" and self.isVisible:
+            self.x -= (self.x - playerX) // 5
+            self.y -= (self.y - playerY) // 5
+            self.hitbox.x = self.x
+            self.hitbox.y = self.y
+            self.hitbox.update(screenWidth, screenHeight)
+            self.scroll += (self.x - playerX) // 5
+            self.scrollY += (self.y - playerY) // 5
+            #print(f"player, {playerX - 30 + self.scroll}, {playerY - 30 + self.scrollY}, {playerX + 30 + self.scroll},{playerY + 30 + self.scrollY}")
+            #print(f"playerX, Y: {playerX}, {playerY}")
+            #print(f"scrollX, scrollY: {self.scroll}, {self.scrollY}")
+            #print("hitbox", self.hitbox.x - self.hitbox.w / 2, self.hitbox.y - self.hitbox.h,
+            #      self.hitbox.x + self.hitbox.w / 2, self.hitbox.y + self.hitbox.y / 2)
         super(Coins, self).update(screenWidth, screenHeight, self.image)

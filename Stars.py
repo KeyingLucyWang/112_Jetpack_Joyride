@@ -27,3 +27,5 @@ class Stars(GameObject):
         super(Stars, self).update(screenWidth, screenHeight, self.image)
         if self.count >= 2:
             self.show = False
+            self.kill()
+            self.count = 0
