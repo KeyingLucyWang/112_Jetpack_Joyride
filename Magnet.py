@@ -10,7 +10,7 @@ class Magnet(GameObject):
 
     def __init__(self, x, y):
         self.image = pygame.transform.scale(pygame.image.load("magnet.png"),
-                                              (50, 45))
+                                              (40, 35))
         super(Magnet, self).__init__(x - 50, y + 50, self.image)
 
     def update(self, screenWidth, screenHeight, playerX, playerY):

@@ -15,6 +15,8 @@ class Bullets(GameObject):
         self.distanceTraveled = 0
 
     def update(self, screenWidth, screenHeight):
+        if self.distanceTraveled >= 300:
+            self.kill()
         self.x += 20
         self.distanceTraveled += 20
         super(Bullets, self).update(screenWidth, screenHeight, self.image)

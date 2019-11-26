@@ -4,26 +4,37 @@ import random
 from Player import Player
 from Obstacles import Obstacles
 from Coins import Coins
-from Hitboxes import Hitboxes
+#from Hitboxes import Hitboxes
 #from Stars import Stars
 from ItemBoxes import ItemBoxes
+from Rockets import Rockets
+from pygame.locals import *
+from WarningSigns import WarningSigns
+from Lasers import Lasers
+from LasersPrep import LasersPrep
 
 class PygameGame(object):
 
     def init(self):
+        Obstacles.init()
         self.obstacles = pygame.sprite.Group()
         pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(2000, 3500))
         Player.init()
         self.player = Player(self.width / 2, self.height / 2)
         self.playerGroup = pygame.sprite.GroupSingle(self.player)
-        self.bulletGroup = pygame.sprite.GroupSingle(self.player.bullet)
+        self.bulletGroup = pygame.sprite.Group()
         self.magnetGroup = pygame.sprite.GroupSingle(self.player.magnet)
         Coins.init()
         self.coins = pygame.sprite.Group()
-        #self.hitboxes = pygame.sprite.Group()
-        #Stars.init()
-        #self.stars = pygame.sprite.Group()
         self.itemBoxes = pygame.sprite.Group()
+        Rockets.init()
+        self.rockets = pygame.sprite.Group()
+        WarningSigns.init()
+        self.warningSigns = pygame.sprite.Group()
+        Lasers.init()
+        self.lasers = pygame.sprite.Group()
+        LasersPrep.init()
+        self.lasersPrep = pygame.sprite.Group()
         
     def mousePressed(self, x, y):
         pass
@@ -59,24 +70,33 @@ class PygameGame(object):
         self.fps = fps
         self.title = title
         self.mode = "start"
+        self.isPaused = False
         
         self.obstaclesLst = []
-        self.obstacleHitboxes = []
+        #self.obstacleHitboxes = []
         
         self.coinsLst = []
-        self.coinsHitboxes = []
+        #self.coinsHitboxes = []
         
         #self.starsLst = []
         
         self.itemBoxesLst = []
-        self.itemBoxesHitBoxes = []
+        #self.itemBoxesHitBoxes = []
+
+        self.rocketsLst = []
+        self.warningSignsLst = []
+
+        self.lasersLst = []
+        self.lasersPrepLst = []
+        
+        self.objects = set()
         pygame.init()
     
     def run(self):
-
         clock = pygame.time.Clock()
         screen = pygame.display.set_mode((self.width, self.height))
         # set the title of the window
+        screen.set_alpha(None)
         pygame.display.set_caption(self.title)
 
         # stores all the keys currently being held down
@@ -117,39 +137,63 @@ class PygameGame(object):
                         for obstacle in self.obstaclesLst:
                             prevX, prevY = obstacle.x, obstacle.y
                             if prevX > maxX:
-                                maxX = prevX
+                                maxX = int(prevX)
                         x = random.randint(max(self.width / 2 + self.player.x,
                                                maxX + 300),
                                            max(self.width / 2 + self.player.x,
                                                maxX + 700))
                         y = random.randint(50, self.height - 50)
                     currentObstacle = Obstacles(x, y)
-                    self.obstaclesLst.append(currentObstacle)
-                    self.obstacles.add(currentObstacle)
-                    self.obstacleHitboxes.append(currentObstacle.hitbox)
+                    add = True
+                    for obj in self.objects:
+                        if currentObstacle.collide(obj):
+                            add = False
+                    if add:
+                        self.obstaclesLst.append(currentObstacle)
+                        self.obstacles.add(currentObstacle)
+                        #self.obstacleHitboxes.append(currentObstacle.hitbox)
+                        self.objects.add(currentObstacle)
                 elif event.type == pygame.USEREVENT+2:
+                    startX = 0
                     if len(self.coinsLst) == 0:
-                        x = random.randint(self.width, self.width * 2)
-                        y = random.randint(50, self.height - 50)
+                        startX = random.randint(self.width, self.width * 2)
                     else:
                         maxX = 0
                         for coin in self.coinsLst:
                             if not coin.isVisible:
                                 prevX, prevY = coin.x, coin.y
                                 if prevX > maxX:
-                                    maxX = prevX
-                            x = random.randint(max(self.width / 2 + self.player.x,
+                                    maxX = int(prevX)
+                        startX = random.randint(max(self.width / 2 + self.player.x,
                                                    maxX + 200),
                                                max(self.width / 2 + self.player.x,
                                                    maxX + 300))
-                            y = random.randint(50, self.height - 50)
-                    currentCoin = Coins(x, y)
-                    self.coinsLst.append(currentCoin)
-                    self.coins.add(currentCoin)
-                    self.coinsHitboxes.append(currentCoin.hitbox)
-                    #self.hitboxes.add(currentCoin.hitbox)
-                    #self.stars.add(currentCoin.star)
-                    #self.starsLst.append(currentCoin.star)
+                    y = random.randint(50, self.height - 50)
+                    coinShape = random.choice(["lines", "heart"])
+                    newCoins = []
+                    if coinShape == "lines":
+                        #print(Coins.lines)
+                        for (xcor, ycor) in Coins.lines:
+                            #print("coin created")
+                            newCoin = Coins(startX + xcor, y + ycor)
+                            newCoins.append(newCoin)
+                    elif coinShape == "heart":
+                        for (xcor, ycor) in Coins.heart:
+                            #print("coin created")
+                            newCoin = Coins(startX + xcor, y + ycor)
+                            newCoins.append(newCoin)
+                    add = True
+                    for coin in newCoins:
+                        for obj in self.objects:
+                            if coin.collide(obj):
+                                add = False
+                    if add:
+                        for coin in newCoins:
+                            #print("coins added")
+                            self.coinsLst.append(coin)
+                            self.coins.add(coin)
+                            #self.coinsHitboxes.append(coin.hitbox)
+                            self.objects.add(coin)
                 elif event.type == pygame.USEREVENT+3:
                     if len(self.itemBoxesLst) == 0:
                         x = random.randint(self.width, self.width * 2)
@@ -159,7 +203,7 @@ class PygameGame(object):
                         for itemBox in self.itemBoxesLst:
                             prevX, prevY = itemBox.x, itemBox.y
                             if prevX > maxX:
-                                maxX = prevX
+                                maxX = int(prevX)
                         x = random.randint(max(self.width / 2 + self.player.x,
                                                maxX + 200),
                                            max(self.width / 2 + self.player.x,
@@ -167,9 +211,49 @@ class PygameGame(object):
                         y = random.randint(50, self.height - 50)
                     itemType = random.choice(["invincible", "magnet suit"])
                     currentItemBox = ItemBoxes(x, y, itemType)
-                    self.itemBoxesLst.append(currentItemBox)
-                    self.itemBoxes.add(currentItemBox)
-                    self.itemBoxesHitBoxes.append(currentItemBox.hitbox)
+                    add = True
+                    for obj in self.objects:
+                        if currentItemBox.collide(obj):
+                            add = False
+                    if add:
+                        self.itemBoxesLst.append(currentItemBox)
+                        self.itemBoxes.add(currentItemBox)
+                        #self.itemBoxesHitBoxes.append(currentItemBox.hitbox)
+                        self.objects.add(currentItemBox)
+                elif event.type == pygame.USEREVENT+4:
+                    x = self.width * 3
+                    y = random.randint(50, self.height - 50)
+                    currentRocket = Rockets(x, y)
+                    add = True
+                    for laser in self.lasers:
+                        if abs(currentRocket.x - laser.x) < 10:
+                            add = False
+                    if add:
+                        self.rockets.add(currentRocket)
+                        self.rocketsLst.append(currentRocket)
+                        currentWarningSign = WarningSigns(self.width - 30, y)
+                        self.warningSigns.add(currentWarningSign)
+                        self.warningSignsLst.append(currentWarningSign)
+
+                elif event.type == pygame.USEREVENT+5:
+                    x = self.player.x
+                    y = random.randint(50, self.height - 50)
+                    currentLaser = Lasers(x, y)
+                    add = True
+                    for rocket in self.rockets:
+                        if abs(currentLaser.x - rocket.x) < 10:
+                            add = False
+                    if add:
+                        self.lasers.add(currentLaser)
+                        self.lasersLst.append(currentLaser)
+                        prepX1 = x - 340
+                        prepX2 = x + 340
+                        currentLasersPrep1 = LasersPrep(prepX1, y)
+                        currentLasersPrep2 = LasersPrep(prepX2, y)
+                        self.lasersPrep.add(currentLasersPrep1)
+                        self.lasersPrep.add(currentLasersPrep2)
+                        self.lasersPrepLst.append(currentLasersPrep1)
+                        self.lasersPrepLst.append(currentLasersPrep2)
             self.redrawAll(screen)
             pygame.display.flip()
 
