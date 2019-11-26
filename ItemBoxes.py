@@ -8,6 +8,7 @@ class ItemBoxes(GameObject):
         pass
 
     def __init__(self, x, y, itemType):
+        # image taken from: https://vignette.wikia.nocookie.net/fantendo/images/f/fc/ItemBoxMK8.png/revision/latest?cb=20170829104937
         self.image = pygame.transform.scale(pygame.image.load("item box.png"),
                                             (60, 60))
         width, height = self.image.get_size()

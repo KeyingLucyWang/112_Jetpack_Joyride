@@ -5,6 +5,8 @@ from gameObject import GameObject
 class WarningSigns(GameObject):
     @staticmethod
     def init():
+        # image taken from: http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png
+        # image taken from: https://www.transparenttextures.com/patterns/asfalt-light.png
         WarningSigns.sprite = [pygame.transform.scale(pygame.image.load("warning.png"),
                                                       (50, 50)),
                                pygame.transform.scale(pygame.image.load("warning.png"),

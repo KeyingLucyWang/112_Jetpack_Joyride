@@ -9,8 +9,7 @@ from Obstacles import Obstacles
 class Player(GameObject):
     @staticmethod
     def init():
-        #Player.image = pygame.transform.scale(pygame.image.load("bird.png").convert_alpha(),
-        #                                      (40, 30))
+        # all images taken from: https://bevouliin.com/game-character-green-fur-monster-sprite-sheets/
         Player.fly = [pygame.image.load("flying/a1.png"),
                       pygame.image.load("flying/a2.png"),
                       pygame.image.load("flying/a3.png"),
@@ -65,8 +64,8 @@ class Player(GameObject):
                     self.y = self.height / 2
             elif keysDown(pygame.K_DOWN):
                 self.y += 10
-                if self.y + self.height / 2 > screenHeight - 50:
-                    self.y = screenHeight - 50 - self.height / 2
+                if self.y + self.height / 2 > screenHeight - 30:
+                    self.y = screenHeight - 30 - self.height / 2
                     vy = 0
             Player.image = Player.invincible[self.count % 3]
             self.count += 1
@@ -131,9 +130,9 @@ class Player(GameObject):
             else:
                 vy = vy + ay * dt1
                 self.y = self.y + vy * dt1 
-                if self.y + self.height / 2 > screenHeight - 50:
-                    self.y = screenHeight - 50 - self.height / 2
-            if (self.y >= screenHeight - 50 - self.height / 2) and not keysDown(pygame.K_UP):
+                if self.y + self.height / 2 > screenHeight - 30:
+                    self.y = screenHeight - 30 - self.height / 2
+            if (self.y >= screenHeight - 30 - self.height / 2) and not keysDown(pygame.K_UP):
                 vy = 0
             if self.y <= self.height / 2 and not keysDown(pygame.K_UP):
                 vy = 0

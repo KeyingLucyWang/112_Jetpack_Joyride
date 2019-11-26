@@ -15,6 +15,7 @@ from WarningSigns import WarningSigns
 class Game(PygameGame):
     def init(self):
         super().init()
+        # image taken from: https://opengameart.org/sites/default/files/Free-Horizontal-2D-Game-Backgrounds-3.jpg
         self.bg = pygame.image.load("mountain.png")
         self.bgWidth = self.bg.get_width()
         self.bgX = 0
@@ -25,14 +26,12 @@ class Game(PygameGame):
         self.score = 0
         pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(4000, 6000)) # random obstacles event
         pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(2000, 5000)) # random coins event
-        pygame.time.set_timer(pygame.USEREVENT+3, random.randrange(10000, 15000))# random item boxes event
-        pygame.time.set_timer(pygame.USEREVENT+4, random.randrange(12000, 15000)) # random rockets event
-        #pygame.time.set_timer(pygame.USEREVENT+5, random.choice([0, 2000, 6000, 8000, 8100, 8200, 8300, 8400,
-        #                                                         8500, 8600, 8700, 8800, 8900, 9000, 9100, 9200,
-        #                                                         9300, 9400, 9500, 9600, 9700, 9800, 9900, 10000])) # random lasers event
-        pygame.time.set_timer(pygame.USEREVENT+5, random.randrange(6000, 10000))
+        pygame.time.set_timer(pygame.USEREVENT+3, random.randrange(12000, 15000))# random item boxes event
+        pygame.time.set_timer(pygame.USEREVENT+4, random.randrange(15000, 20000)) # random rockets event
+        pygame.time.set_timer(pygame.USEREVENT+5, random.randrange(9000, 10000))
         
     def redrawAll(self, screen):
+        # text font from: https://www.fontsquirrel.com/fonts/amatic
         # game over screen
         if not self.playerGroup.sprite.isAlive:
             screen.fill((0, 0, 0))
@@ -49,6 +48,93 @@ class Game(PygameGame):
             pygame.display.update()
             return
 
+        if self.mode == "register":
+            screen.fill((0, 0, 0))
+            if self.userExist or self.registerSuccessful:
+                textFont = pygame.font.SysFont("comicsansms", 20)
+                if self.userExist:
+                    text = textFont.render("Username already exists. Choose another username or log in.", True, (255, 255, 255))
+                elif self.registerSuccessful:
+                    text = textFont.render("Register successful. Press SPACE to log in.", True, (255, 255, 255))
+                textRect = text.get_rect()
+                textRect.center = (self.width / 2, self.height / 2 - 40)
+                screen.blit(text, textRect)
+            modeFont = pygame.font.SysFont("comicsansms", 30)
+            mode = modeFont.render("REGISTER", True, (255, 255, 255))
+            modeRect = mode.get_rect()
+            modeRect.center = (self.width / 2, self.height / 2 - 70)
+            screen.blit(mode, modeRect)
+            if not self.registerSuccessful:
+                textFont = pygame.font.SysFont("comicsansms", 20)
+                prompt = textFont.render("Please type in your username and password. Press enter to confirm.", True, (255, 255, 255))
+                promptRect = prompt.get_rect()
+                promptRect.center = (self.width / 2, self.height / 2 - 20)
+                screen.blit(prompt, promptRect)
+                nameFont = pygame.font.SysFont("comicsansms", 20)
+                userName = nameFont.render(f'Username: {self.userName}', True, (255, 255, 255))
+                nameRect = userName.get_rect()
+                nameRect.center = (self.width / 2, self.height / 2)
+                screen.blit(userName, nameRect)
+                pwFont = pygame.font.SysFont("comicsansms", 20)
+                password = pwFont.render(f'Password: {self.passWord}', True, (255, 255, 255))
+                pwRect = password.get_rect()
+                pwRect.center = (self.width / 2, self.height / 2 + 20)
+                screen.blit(password, pwRect)
+
+        # login screen
+        if self.mode == "login":
+            screen.fill((0, 0, 0))
+            if self.printInvalidUserIns:
+                font = pygame.font.SysFont("comicsansms", 20)
+                text = font.render("Username not found. Press SPACE to register", True, (255, 255, 255))
+                textRect = text.get_rect()
+                textRect.center = (self.width / 2, self.height / 2 - 40)
+                screen.blit(text, textRect)
+            elif self.printErrorIns:
+                font = pygame.font.SysFont("comicsansms", 20)
+                text = font.render("Password incorrect. Login failed. Please re-enter the password", True, (255, 255, 255))
+                textRect = text.get_rect()
+                textRect.center = (self.width / 2, self.height / 2 - 40)
+                screen.blit(text, textRect)
+            modeFont = pygame.font.SysFont("comicsansms", 30)
+            mode = modeFont.render("LOGIN", True, (255, 255, 255))
+            modeRect = mode.get_rect()
+            modeRect.center = (self.width / 2, self.height / 2 - 70)
+            screen.blit(mode, modeRect)
+            textFont = pygame.font.SysFont("comicsansms", 20)
+            prompt = textFont.render("Please type in your username and password. Press enter to confirm.", True, (255, 255, 255))
+            promptRect = prompt.get_rect()
+            promptRect.center = (self.width / 2, self.height / 2 - 20)
+            screen.blit(prompt, promptRect)
+            nameFont = pygame.font.SysFont("comicsansms", 20)
+            userName = nameFont.render(f'Username: {self.userName}', True, (255, 255, 255))
+            nameRect = userName.get_rect()
+            nameRect.center = (self.width / 2, self.height / 2)
+            screen.blit(userName, nameRect)
+            pwFont = pygame.font.SysFont("comicsansms", 20)
+            password = pwFont.render(f'Password: {self.passWord}', True, (255, 255, 255))
+            pwRect = password.get_rect()
+            pwRect.center = (self.width / 2, self.height / 2 + 20)
+            screen.blit(password, pwRect)
+    
+        if self.mode == "profile":
+            screen.fill((0, 0, 0))
+            modeFont = pygame.font.SysFont("comicsansms", 30)
+            mode = modeFont.render("PROFILE", True, (255, 255, 255))
+            modeRect = mode.get_rect()
+            modeRect.center = (self.width / 2, self.height / 2 - 70)
+            screen.blit(mode, modeRect)
+            nameFont = pygame.font.SysFont("comicsansms", 30)
+            userName = nameFont.render(f'Welcome {self.userName}!', True, (255, 255, 255))
+            nameRect = userName.get_rect()
+            nameRect.center = (self.width / 2, self.height / 2)
+            screen.blit(userName, nameRect)
+            messageFont = pygame.font.SysFont("comicsansms", 20)
+            message = messageFont.render("Profile mode waiting to be implemented. Press 's' to start the game", True, (255, 255, 255))
+            messageRect = message.get_rect()
+            messageRect.center = (self.width / 2, self.height / 2 + 50)
+            screen.blit(message, messageRect)
+        
         # start screen
         if self.mode == "start":
             screen.blit(self.bg, (self.bgX, 0))
@@ -58,7 +144,7 @@ class Game(PygameGame):
             titleRect.center = (self.width / 2, self.height / 2 - 70)
             screen.blit(title, titleRect)
             insFont = pygame.font.Font("Amatic-Bold.ttf", 25)
-            ins = insFont.render('Press any key to start!', True, (0, 0, 0))
+            ins = insFont.render('Press "space" to register! Press "escape" to log in!', True, (0, 0, 0))
             insRect = ins.get_rect()
             insRect.center = (self.width / 2, self.height / 2)
             screen.blit(ins, insRect)

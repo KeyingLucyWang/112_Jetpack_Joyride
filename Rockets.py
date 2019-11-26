@@ -5,6 +5,7 @@ from gameObject import GameObject
 class Rockets(GameObject):
     @staticmethod
     def init():
+        # image take from: https://www.stickpng.com/assets/images/58e911aceb97430e819064d8.png
         Rockets.image = pygame.transform.scale(pygame.image.load("rocket.png"), (80, 60))
         
     def __init__(self, x, y):

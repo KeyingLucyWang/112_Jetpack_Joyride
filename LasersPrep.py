@@ -5,6 +5,7 @@ from gameObject import GameObject
 class LasersPrep(GameObject):
     @staticmethod
     def init():
+        # images taken from: https://cdn.glitch.com/a3cb1903-3df2-470f-9076-c2370808ed39%2F5a4e52452da5ad73df7efe7e.png?1537075519443
         LasersPrep.sprite = [pygame.transform.scale(pygame.image.load("laser eye.png"),
                                              (80, 80)),
                              pygame.transform.scale(pygame.image.load("laser eye2.png"),

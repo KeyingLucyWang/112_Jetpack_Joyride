@@ -2,14 +2,15 @@ import pygame
 import math
 from gameObject import GameObject
 
+# class not used in the game
 class Hitboxes(object):
     def __init__(self, x, y, w, h, itemClass):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
-        self.image = pygame.transform.scale(pygame.image.load("item box.png").convert_alpha(),
-                                            (20, 20))
+        self.image = None
+        
         self.itemClass = itemClass
         if itemClass == "coins":
             self.cors = ((self.x - self.w / 2, self.y - self.h / 2,

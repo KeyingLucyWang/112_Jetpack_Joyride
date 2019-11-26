@@ -2,9 +2,11 @@ import pygame
 import math
 from gameObject import GameObject
 
+# class not used in the game
 class Stars(GameObject):
     @staticmethod
     def init():
+        # image taken from: https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/google/110/sparkles_2728.png
         Stars.sprite = [pygame.transform.scale(pygame.image.load("stars.png"),
                                                (20, 20)),
                         pygame.transform.scale(pygame.image.load("stars.png"),

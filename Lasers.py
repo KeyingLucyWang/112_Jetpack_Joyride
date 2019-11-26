@@ -5,6 +5,7 @@ from gameObject import GameObject
 class Lasers(GameObject):
     @staticmethod
     def init():
+        # image taken from: https://backgrounddownload.com/wp-content/uploads/2018/09/lightsaber-blade-transparent-background-300x200.png
         Lasers.sprite = pygame.transform.scale(pygame.image.load("laser.png"),
                                                (680, 10))
         Lasers.transparent = pygame.transform.scale(pygame.image.load("transparent.png"),

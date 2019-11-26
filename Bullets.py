@@ -5,6 +5,7 @@ from gameObject import GameObject
 class Bullets(GameObject):
     @staticmethod
     def init():
+        # image taken from: https://bevouliin.com/game-character-green-fur-monster-sprite-sheets/
         Bullets.image = pygame.transform.scale(pygame.image.load("bullet-A.png"),
                                               (50, 50))
 

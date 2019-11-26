@@ -7,13 +7,14 @@ from gameObject import GameObject
 class Coins(GameObject):
     @staticmethod
     def init():
+        # image taken from: https://webstockreview.net/images/coin-clipart-sprite-5.png
         Coins.sprite = [pygame.image.load("coins/coin1.png"),
                         pygame.image.load("coins/coin2.png"),
                         pygame.image.load("coins/coin3.png"),
                         pygame.image.load("coins/coin4.png"),
                         pygame.image.load("coins/coin5.png"),
                         pygame.image.load("coins/coin6.png")]
-        
+        # image taken from: https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/google/110/sparkles_2728.png
         Coins.starSprite = [pygame.transform.scale(pygame.image.load("stars.png"),
                                                    (20, 20)),
                             pygame.transform.scale(pygame.image.load("stars.png"),

@@ -71,6 +71,19 @@ class PygameGame(object):
         self.title = title
         self.mode = "start"
         self.isPaused = False
+
+        # initialize user text file
+        self.loginText = open("loginText.txt","a+")
+        self.loginText.close()
+        self.userName = ""
+        self.passWord = ""
+        self.isTypingName = True
+        self.isTypingPW = True
+        self.recorded = False
+        self.printInvalidUserIns = False
+        self.printErrorIns = False
+        self.userExist = False
+        self.registerSuccessful = False
         
         self.obstaclesLst = []
         #self.obstacleHitboxes = []
@@ -121,14 +134,257 @@ class PygameGame(object):
                     self.mouseDrag(*(event.pos))
                 elif event.type == pygame.KEYDOWN:
                     self._keys[event.key] = True
-                    self.mode = "game"
+                    if (self.mode == "start" and event.key == pygame.K_SPACE) or (self.mode == "login" and event.key == pygame.K_SPACE):
+                        self.mode = "register"
+                        self.userName = ""
+                        self.passWord= ""
+                        self.isTypingName = True
+                        self.isTypingPW = True
+                        self.userExist = False
+                        self.registerSuccessful = False
+                    elif (self.mode == "start" and event.key == pygame.K_ESCAPE) or (self.mode == "register" and event.key == pygame.K_SPACE):
+                        self.mode = "login"
+                        self.printInvalidUserIns = False
+                        self.printErrorIns = False
+                        self.isTypingName = True
+                        self.isTypingPW = True
+                        self.userName = ""
+                        self.passWord= ""
+                    if self.mode == "profile" and event.key == pygame.K_s:
+                        print("enter game mode")
+                        self.mode = "game"
+                    if self.mode == "start" and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
+                        print("enter game mode")
+                        self.mode = "game"
                     self.keyPressed(event.key, event.mod)
                 elif event.type == pygame.KEYUP:
                     self._keys[event.key] = False
                     self.keyReleased(event.key, event.mod)
+                    if self.isTypingName:
+                        self.userExist = False
+                        if event.key == pygame.K_a:
+                            self.userName = self.userName + "a"
+                        if event.key == pygame.K_b:
+                            self.userName = self.userName + "b"
+                        if event.key == pygame.K_c:
+                            self.userName = self.userName + "c"
+                        if event.key == pygame.K_d:
+                            self.userName = self.userName + "d"
+                        if event.key == pygame.K_e:
+                            self.userName = self.userName + "e"
+                        if event.key == pygame.K_f:
+                            self.userName = self.userName + "f"
+                        if event.key == pygame.K_g:
+                            self.userName = self.userName + "g"
+                        if event.key == pygame.K_h:
+                            self.userName = self.userName + "h"
+                        if event.key == pygame.K_i:
+                            self.userName = self.userName + "i"
+                        if event.key == pygame.K_j:
+                            self.userName = self.userName + "j"
+                        if event.key == pygame.K_k:
+                            self.userName = self.userName + "k"
+                        if event.key == pygame.K_l:
+                            self.userName = self.userName + "l"
+                        if event.key == pygame.K_m:
+                            self.userName = self.userName + "m"
+                        if event.key == pygame.K_n:
+                            self.userName = self.userName + "n"
+                        if event.key == pygame.K_o:
+                            self.userName = self.userName + "o"
+                        if event.key == pygame.K_p:
+                            self.userName = self.userName + "p"
+                        if event.key == pygame.K_q:
+                            self.userName = self.userName + "q"
+                        if event.key == pygame.K_r:
+                            self.userName = self.userName + "r"
+                        if event.key == pygame.K_s:
+                            self.userName = self.userName + "s"
+                        if event.key == pygame.K_t:
+                            self.userName = self.userName + "t"
+                        if event.key == pygame.K_u:
+                            self.userName = self.userName + "u"
+                        if event.key == pygame.K_v:
+                            self.userName = self.userName + "v"
+                        if event.key == pygame.K_w:
+                            self.userName = self.userName + "w"
+                        if event.key == pygame.K_x:
+                            self.userName = self.userName + "x"
+                        if event.key == pygame.K_y:
+                            self.userName = self.userName + "y"
+                        if event.key == pygame.K_z:
+                            self.userName = self.userName + "z"
+                        if event.key == pygame.K_1:
+                            self.userName = self.userName + "1"
+                        if event.key == pygame.K_2:
+                            self.userName = self.userName + "2"
+                        if event.key == pygame.K_3:
+                            self.userName = self.userName + "3"
+                        if event.key == pygame.K_4:
+                            self.userName = self.userName + "4"
+                        if event.key == pygame.K_5:
+                            self.userName = self.userName + "5"
+                        if event.key == pygame.K_6:
+                            self.userName = self.userName + "6"
+                        if event.key == pygame.K_7:
+                            self.userName = self.userName + "7"
+                        if event.key == pygame.K_8:
+                            self.userName = self.userName + "8"
+                        if event.key == pygame.K_9:
+                            self.userName = self.userName + "9"
+                        if event.key == pygame.K_0:
+                            self.userName = self.userName + "0"
+                        if event.key == pygame.K_PERIOD:
+                            self.userName = self.userName + "."
+                        if event.key == pygame.K_BACKSPACE:
+                            self.userName = self.userName[:-1]
+                        if event.key == pygame.K_RETURN:
+                            if self.mode == "register":
+                                self.loginText = open("loginText.txt", "r")
+                                if self.loginText.mode == "r":
+                                    contents = self.loginText.read()
+                                for line in contents.splitlines():
+                                    data = line.split(",")
+                                    if self.userName == data[0]:
+                                        print("user exists")
+                                        self.userExist = True
+                            if not self.userExist:
+                                self.isTypingName = False
+                            else:
+                                self.userName = ""
+                            
+                    elif self.isTypingPW:
+                        if event.key == pygame.K_a:
+                            self.passWord = self.passWord + "a"
+                        if event.key == pygame.K_b:
+                            self.passWord = self.passWord + "b"
+                        if event.key == pygame.K_c:
+                            self.passWord = self.passWord + "c"
+                        if event.key == pygame.K_d:
+                            self.passWord = self.passWord + "d"
+                        if event.key == pygame.K_e:
+                            self.passWord = self.passWord + "e"
+                        if event.key == pygame.K_f:
+                            self.passWord = self.passWord + "f"
+                        if event.key == pygame.K_g:
+                            self.passWord = self.passWord + "g"
+                        if event.key == pygame.K_h:
+                            self.passWord = self.passWord + "h"
+                        if event.key == pygame.K_i:
+                            self.passWord = self.passWord + "i"
+                        if event.key == pygame.K_j:
+                            self.passWord = self.passWord + "j"
+                        if event.key == pygame.K_k:
+                            self.passWord = self.passWord + "k"
+                        if event.key == pygame.K_l:
+                            self.passWord = self.passWord + "l"
+                        if event.key == pygame.K_m:
+                            self.passWord = self.passWord + "m"
+                        if event.key == pygame.K_n:
+                            self.passWord = self.passWord + "n"
+                        if event.key == pygame.K_o:
+                            self.passWord = self.passWord + "o"
+                        if event.key == pygame.K_p:
+                            self.passWord = self.passWord + "p"
+                        if event.key == pygame.K_q:
+                            self.passWord = self.passWord + "q"
+                        if event.key == pygame.K_r:
+                            self.passWord = self.passWord + "r"
+                        if event.key == pygame.K_s:
+                            self.passWord = self.passWord + "s"
+                        if event.key == pygame.K_t:
+                            self.passWord = self.passWord + "t"
+                        if event.key == pygame.K_u:
+                            self.passWord = self.passWord + "u"
+                        if event.key == pygame.K_v:
+                            self.passWord = self.passWord + "v"
+                        if event.key == pygame.K_w:
+                            self.passWord = self.passWord + "w"
+                        if event.key == pygame.K_x:
+                            self.passWord = self.passWord + "x"
+                        if event.key == pygame.K_y:
+                            self.passWord = self.passWord + "y"
+                        if event.key == pygame.K_z:
+                            self.passWord = self.passWord + "z"
+                        if event.key == pygame.K_1:
+                            self.passWord = self.passWord + "1"
+                        if event.key == pygame.K_2:
+                            self.passWord = self.passWord + "2"
+                        if event.key == pygame.K_3:
+                            self.passWord = self.passWord + "3"
+                        if event.key == pygame.K_4:
+                            self.passWord = self.passWord + "4"
+                        if event.key == pygame.K_5:
+                            self.passWord = self.passWord + "5"
+                        if event.key == pygame.K_6:
+                            self.passWord = self.passWord + "6"
+                        if event.key == pygame.K_7:
+                            self.passWord = self.passWord + "7"
+                        if event.key == pygame.K_8:
+                            self.passWord = self.passWord + "8"
+                        if event.key == pygame.K_9:
+                            self.passWord = self.passWord + "9"
+                        if event.key == pygame.K_0:
+                            self.passWord = self.passWord + "0"
+                        if event.key == pygame.K_BACKSPACE:
+                            self.passWord = self.passWord[:-1]
+                        if event.key == pygame.K_RETURN:
+                            self.isTypingPW = False
+                            
+                    if self.mode == "register" and not self.isTypingPW and not self.isTypingName and not self.recorded:
+                        '''
+                        self.loginText = open("loginText.txt", "r")
+                        if self.loginText.mode == "r":
+                            contents = self.loginText.read()
+                        for line in contents.splitlines():
+                            data = line.split(",")
+                            if self.userName == data[0]:
+                                print("user exists")
+                                self.userExist = True
+                        '''
+                        if not self.userExist:
+                            self.loginText = open("loginText.txt", "a+")
+                            self.loginText.write(f"{self.userName},{self.passWord}\r\n")
+                            self.loginText.close()
+                            self.recorded = True
+                            print("recorded")
+                            self.registerSuccessful = True
+                        self.userName = ""
+                        self.passWord= ""
+
+                    if self.mode == "login" and not self.isTypingName and not self.isTypingPW:
+                        self.loginText = open("loginText.txt", "r")
+                        if self.loginText.mode == "r":
+                            contents = self.loginText.read()
+                        pw = ""
+                        for line in contents.splitlines():
+                            data = line.split(",")
+                            print(data)
+                            #print(data[0], data[1])
+                            if self.userName == data[0]:
+                                pw = data[1]
+                        if pw == "":
+                            print("user not found")
+                            self.printInvalidUserIns = True
+                            self.userName = ""
+                            self.passWord = ""
+                            #self.mode = "register"
+                        else:
+                            if self.passWord == pw:
+                                print("profile mode")
+                                self.mode = "profile"
+                            else:
+                                self.printErrorIns = True
+                                self.passWord = ""
+                                self.isTypingPW = True
+                        self.loginText.close()
+                    #if not self.isTypingName:
+                    #    print("userName", self.userName)
+                    #if not self.isTypingPW:
+                    #    print("PW", self.passWord)
                 elif event.type == pygame.QUIT:
                     playing = False
-                elif event.type == pygame.USEREVENT+1:
+                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+1:
                     if len(self.obstaclesLst) == 0:
                         x = random.randint(self.width, self.width * 2)
                         y = random.randint(50, self.height - 50)
@@ -153,7 +409,7 @@ class PygameGame(object):
                         self.obstacles.add(currentObstacle)
                         #self.obstacleHitboxes.append(currentObstacle.hitbox)
                         self.objects.add(currentObstacle)
-                elif event.type == pygame.USEREVENT+2:
+                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+2:
                     startX = 0
                     if len(self.coinsLst) == 0:
                         startX = random.randint(self.width, self.width * 2)
@@ -194,7 +450,7 @@ class PygameGame(object):
                             self.coins.add(coin)
                             #self.coinsHitboxes.append(coin.hitbox)
                             self.objects.add(coin)
-                elif event.type == pygame.USEREVENT+3:
+                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+3:
                     if len(self.itemBoxesLst) == 0:
                         x = random.randint(self.width, self.width * 2)
                         y = random.randint(50, self.height - 50)
@@ -220,13 +476,13 @@ class PygameGame(object):
                         self.itemBoxes.add(currentItemBox)
                         #self.itemBoxesHitBoxes.append(currentItemBox.hitbox)
                         self.objects.add(currentItemBox)
-                elif event.type == pygame.USEREVENT+4:
+                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+4:
                     x = self.width * 3
                     y = random.randint(50, self.height - 50)
                     currentRocket = Rockets(x, y)
                     add = True
                     for laser in self.lasers:
-                        if abs(currentRocket.x - laser.x) < 10:
+                        if abs(currentRocket.y - laser.y) < 10:
                             add = False
                     if add:
                         self.rockets.add(currentRocket)
@@ -235,13 +491,13 @@ class PygameGame(object):
                         self.warningSigns.add(currentWarningSign)
                         self.warningSignsLst.append(currentWarningSign)
 
-                elif event.type == pygame.USEREVENT+5:
+                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+5:
                     x = self.player.x
                     y = random.randint(50, self.height - 50)
                     currentLaser = Lasers(x, y)
                     add = True
                     for rocket in self.rockets:
-                        if abs(currentLaser.x - rocket.x) < 10:
+                        if abs(currentLaser.y - rocket.y) < 10:
                             add = False
                     if add:
                         self.lasers.add(currentLaser)

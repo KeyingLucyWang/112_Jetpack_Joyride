@@ -5,6 +5,7 @@ from gameObject import GameObject
 class Obstacles(GameObject):
     @staticmethod
     def init():
+        # image taken from: https://www.freepngimg.com/thumb/light/69349-ball-purple-light-energy-google-effects-images.png
         Obstacles.sprite = [pygame.transform.scale(pygame.image.load("lightning ball.png"),
                                             (150, 150)),
                             pygame.transform.scale(pygame.image.load("lightning ball2.png"),

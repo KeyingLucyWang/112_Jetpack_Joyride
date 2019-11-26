@@ -5,6 +5,7 @@ from gameObject import GameObject
 class Magnet(GameObject):
     @staticmethod
     def init():
+        # image taken from: http://img.clipartlook.com/clipartsheep-com-contact-privacy-policy-magnet-clipart-2800_2551.png
         Magnet.image = pygame.transform.scale(pygame.image.load("magnet.png"),
                                               (50, 50))
 
