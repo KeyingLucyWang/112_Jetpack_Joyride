@@ -1,6 +1,7 @@
 # modified code taken from: http://blog.lukasperaza.com/getting-started-with-pygame/
 import pygame
 import random
+import os
 from Player import Player
 from Obstacles import Obstacles
 from Coins import Coins
@@ -73,8 +74,9 @@ class PygameGame(object):
         self.isPaused = False
 
         # initialize user text file
-        self.loginText = open("loginText.txt","a+")
-        self.loginText.close()
+        #self.loginText = open("loginText.txt","a+")
+        #self.loginText.close()
+        self.userFile = None
         self.userName = ""
         self.passWord = ""
         self.isTypingName = True
@@ -84,6 +86,7 @@ class PygameGame(object):
         self.printErrorIns = False
         self.userExist = False
         self.registerSuccessful = False
+        self.moneyRecorded = False
         
         self.obstaclesLst = []
         #self.obstacleHitboxes = []
@@ -134,6 +137,7 @@ class PygameGame(object):
                     self.mouseDrag(*(event.pos))
                 elif event.type == pygame.KEYDOWN:
                     self._keys[event.key] = True
+                    '''
                     if (self.mode == "start" and event.key == pygame.K_SPACE) or (self.mode == "login" and event.key == pygame.K_SPACE):
                         self.mode = "register"
                         self.userName = ""
@@ -150,18 +154,20 @@ class PygameGame(object):
                         self.isTypingPW = True
                         self.userName = ""
                         self.passWord= ""
-                    if self.mode == "profile" and event.key == pygame.K_s:
-                        print("enter game mode")
-                        self.mode = "game"
-                    if self.mode == "start" and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
-                        print("enter game mode")
-                        self.mode = "game"
+                    '''
+                    #if self.mode == "profile" and event.key == pygame.K_s:
+                        #print("enter game mode")
+                        #self.mode = "game"
+                    #if self.mode == "start" and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
+                        #print("enter game mode")
+                        #self.mode = "game"
                     self.keyPressed(event.key, event.mod)
                 elif event.type == pygame.KEYUP:
                     self._keys[event.key] = False
                     self.keyReleased(event.key, event.mod)
                     if self.isTypingName:
                         self.userExist = False
+                        self.printInvalidUserIns = False
                         if event.key == pygame.K_a:
                             self.userName = self.userName + "a"
                         if event.key == pygame.K_b:
@@ -240,18 +246,38 @@ class PygameGame(object):
                             self.userName = self.userName[:-1]
                         if event.key == pygame.K_RETURN:
                             if self.mode == "register":
-                                self.loginText = open("loginText.txt", "r")
-                                if self.loginText.mode == "r":
-                                    contents = self.loginText.read()
+                                #self.loginText = open("loginText.txt", "r")
+                                print(f'userLogin/{self.userName}.txt')
+                                #cleared what was in the text file everytime it is opened
+                                self.userFile = open(f'userLogin/{self.userName}.txt', "a+")
+                                self.userFile.close()
+                                self.userFile = open(f'userLogin/{self.userName}.txt', "r")
+                                if self.userFile.mode == "r":
+                                    print(f"userLogin/{self.userName}.txt")
+                                    print(os.path.getsize(f"userLogin/{self.userName}.txt"))
+                                    if os.path.getsize(f"userLogin/{self.userName}.txt") != 0:
+                                        print("user exists")
+                                        self.userExist = True
+                                    else:
+                                        self.userExist = False
+                                        contents = self.userFile.read()
+                                #if contents != None or contents.strip() != "":
+                                    #print("user exists")
+                                    #self.userExist = True
+                                '''
                                 for line in contents.splitlines():
                                     data = line.split(",")
                                     if self.userName == data[0]:
                                         print("user exists")
                                         self.userExist = True
+                                '''
                             if not self.userExist:
+                                print("type password")
                                 self.isTypingName = False
                             else:
+                                print("clear")
                                 self.userName = ""
+                            #self.userFile.close()
                             
                     elif self.isTypingPW:
                         if event.key == pygame.K_a:
@@ -332,6 +358,15 @@ class PygameGame(object):
                             self.isTypingPW = False
                             
                     if self.mode == "register" and not self.isTypingPW and not self.isTypingName and not self.recorded:
+                        #self.userFile = open(f'userLogin/{self.userName}.txt', "r+")
+                        #if self.userFile.mode == "r+":
+                        #    contents = self.userFile.read()
+                        #if self.userFile != None and self.userFile != "":
+                        #    print("user exists")
+                        #    self.userExist = True
+                        #else:
+                        #    self.userExist = False
+                        #self.userFile.close()
                         '''
                         self.loginText = open("loginText.txt", "r")
                         if self.loginText.mode == "r":
@@ -343,19 +378,54 @@ class PygameGame(object):
                                 self.userExist = True
                         '''
                         if not self.userExist:
-                            self.loginText = open("loginText.txt", "a+")
-                            self.loginText.write(f"{self.userName},{self.passWord}\r\n")
-                            self.loginText.close()
+                            #self.loginText = open("loginText.txt", "a+")
+                            self.userFile = open(f'userLogin/{self.userName}.txt', "a+")
+                            #self.loginText.write(f"{self.userName},{self.passWord}\r\n")
+                            self.userFile.write(f'{self.passWord}\r\n')
+                            self.userFile.write('0\r\n')
+                            #self.loginText.close()
+                            self.userFile.close()
                             self.recorded = True
                             print("recorded")
                             self.registerSuccessful = True
                         self.userName = ""
                         self.passWord= ""
 
-                    if self.mode == "login" and not self.isTypingName and not self.isTypingPW:
-                        self.loginText = open("loginText.txt", "r")
-                        if self.loginText.mode == "r":
-                            contents = self.loginText.read()
+                    if self.mode == "login" and not self.isTypingName: #and not self.isTypingPW:
+                        #self.loginText = open("loginText.txt", "r")
+                        self.userFile = open(f'userLogin/{self.userName}.txt', 'a+')
+                        self.userFile.close()
+                        self.userFile = open(f'userLogin/{self.userName}.txt', 'r')
+                        if self.userFile.mode == "r":
+                            print("enter read")
+                            if os.path.getsize(f'userLogin/{self.userName}.txt') == 0:
+                                print("user not found")
+                                self.printInvalidUserIns = True
+                                self.userName = ""
+                                self.passWord = ""
+                                self.isTypingName = True
+                        #if contents == None or contents == "":
+                            #print("user not found")
+                            #self.printInvalidUserIns = True
+                            #self.userName = ""
+                            #self.passWord = ""
+                            #self.mode = "register"
+                            elif not self.isTypingPW:
+                                contents = self.userFile.read()
+                                #print(contents)
+                                #for line in contents.splitlines():
+                                line = contents.splitlines()[0]
+                                if self.passWord == line.strip():
+                                    print("profile mode")
+                                    print(int(contents.splitlines()[1]))
+                                    self.money = int(contents.splitlines()[1])
+                                    self.mode = "profile"
+                                else:
+                                    self.printErrorIns = True
+                                    self.passWord = ""
+                                    self.isTypingPW = True
+                        self.userFile.close()
+                        '''
                         pw = ""
                         for line in contents.splitlines():
                             data = line.split(",")
@@ -378,6 +448,7 @@ class PygameGame(object):
                                 self.passWord = ""
                                 self.isTypingPW = True
                         self.loginText.close()
+                    '''
                     #if not self.isTypingName:
                     #    print("userName", self.userName)
                     #if not self.isTypingPW:
@@ -510,6 +581,25 @@ class PygameGame(object):
                         self.lasersPrep.add(currentLasersPrep2)
                         self.lasersPrepLst.append(currentLasersPrep1)
                         self.lasersPrepLst.append(currentLasersPrep2)
+    
+                if not self.player.isAlive and not self.moneyRecorded:
+                        print("yeet")
+                        self.userFile = open(f'userLogin/{self.userName}.txt', 'r')
+                        contents = self.userFile.read()
+                        currentPW = contents.splitlines()[0].strip()
+                        print(currentPW)
+                        currentCoins = self.score // 10
+                        totalCoins = currentCoins + self.money
+                        print(totalCoins)
+                        self.money = totalCoins
+                        self.userFile.close()
+                        self.userFile = open(f'userLogin/{self.userName}.txt', 'a+')
+                        self.userFile.seek(0)
+                        self.userFile.truncate()
+                        self.userFile.write(f'{currentPW}\r\n')
+                        self.userFile.write(f'{totalCoins}')
+                        self.userFile.close()
+                        self.moneyRecorded = True
             self.redrawAll(screen)
             pygame.display.flip()
 

@@ -51,6 +51,7 @@ class Player(GameObject):
         self.magnet = None
         self.count = 0
         self.powerUpCount = 0
+        self.scroll = 0
 
     def update(self, dt, keysDown, screenWidth, screenHeight):
         self.timeAlive += dt
