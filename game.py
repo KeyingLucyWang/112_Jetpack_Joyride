@@ -47,12 +47,13 @@ class Game(PygameGame):
         self.scrollSpeed = 3
         self.oriScrollSpeed = self.scrollSpeed
         self.score = 0
+        self.count = 0
         self.money = 0
         self.highestScore = 0
         self.numBullets = 0
-        pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(3000, 5000)) # random obstacle event
-        pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(2000, 5000)) # random coin event
-        pygame.time.set_timer(pygame.USEREVENT+3, random.randrange(12000, 15000))# random item box event
+        pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(2000, 3500)) # random obstacle event
+        pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(1000, 5000)) # random coin event
+        pygame.time.set_timer(pygame.USEREVENT+3, random.randrange(9000, 12000))# random item box event
         pygame.time.set_timer(pygame.USEREVENT+4, random.randrange(15000, 20000)) # random rocket event
         pygame.time.set_timer(pygame.USEREVENT+5, random.randrange(9000, 10000)) # random laser event
         
@@ -108,7 +109,7 @@ class Game(PygameGame):
                 elif self.registerSuccessful:
                     text = textFont.render("Register successful. Please log in.", True, (0, 0, 0))
                 textRect = text.get_rect()
-                textRect.center = (self.width / 2, self.height / 2 - 10)
+                textRect.center = (self.width / 2, self.height / 2)
                 screen.blit(text, textRect)
             modeFont = pygame.font.SysFont("comicsansms", 35)
             mode = modeFont.render("REGISTER", True, (0, 0, 0))
@@ -368,7 +369,9 @@ class Game(PygameGame):
             self.scrollSpeed = self.oriScrollSpeed
         if not self.playerGroup.sprite.isAlive or (self.mode != "game") or self.isPaused:
             return
-        self.score += 1
+        self.count += 1
+        if self.count % 5 == 0:
+            self.score += 1
         if len(self.obstacles) != 0:
             for obstacle in self.obstacles:
                 obstacle.scroll += self.scrollSpeed
@@ -435,7 +438,7 @@ class Game(PygameGame):
         if coins != None:
             for coin in coins:
                 if not coin.hit:
-                    self.score += 50
+                    self.score += 20
                     coin.hit = True
                     coin.count = 0
             #print(f"collide with coin {coin}")
@@ -611,6 +614,7 @@ class Game(PygameGame):
             # if login button is pressed
             elif ((680 <= x <= 680 + self.buttonWidth) and (310 <= y <= 310 + self.buttonHeight)):
                 self.mode = "login"
+                self.score = 0
                 self.printInvalidUserIns = False
                 self.printErrorIns = False
                 self.isTypingName = True
@@ -622,6 +626,10 @@ class Game(PygameGame):
         elif self.mode == "profile":
             # if logout button is pressed
             if ((680 <= x <= 680 + self.buttonWidth) and (310 <= y <= 310 + self.buttonHeight)):
+                print("log out pressed", self.name2, self.score2, self.score)
+                if not self.gamePlayed:
+                    self.document()
+                print("after document", self.name2, self.score2, self.score)
                 self.mode = "start"
                 self.userFile = None
                 self.userName = ""
@@ -635,6 +643,7 @@ class Game(PygameGame):
                 self.registerSuccessful = False
                 self.insufficientCoins = False
                 self.printNewRecord = False
+                self.gamePlayed = False
             # if play button is pressed
             elif ((680 <= x <= 680 + self.buttonWidth) and (260 <= y <= 260 + self.buttonHeight)):
                 self.restartSetup()

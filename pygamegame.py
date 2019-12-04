@@ -92,32 +92,53 @@ class PygameGame(object):
         self.insufficientCoins = False
         self.bulletRecorded = False
         self.printNewRecord = False
+        self.gamePlayed = False
         
         # score board
+        self.highScores = dict()
+        self.scoreLst = []
+        self.name1 = ""
+        self.score1 = None
+        self.name2 = ""
+        self.score2 = None
+        self.name3 = ""
+        self.score3 = None
         self.scoreFile = None
         self.scoreFile = open("scoreBoard.txt", "r")
         contents = self.scoreFile.read()
         print(contents)
         numScores = len(contents.splitlines())
         print(numScores)
-        if numScores == 1:
+        if numScores == 1 and contents.splitlines()[0] != ",":
             self.name1 = (contents.splitlines()[0].split(","))[0]
             self.score1 = int((contents.splitlines()[0].split(","))[1])
+            self.highScores[self.name1] = self.score1
         elif numScores == 2:
-            self.name1 = (contents.splitlines()[0].split(","))[0]
-            self.score1 = int((contents.splitlines()[0].split(","))[1])
-            self.name2 = (contents.splitlines()[1].split(","))[0]
-            self.score2 = int((contents.splitlines()[1].split(","))[1])
+            if contents.splitlines()[0] != ",":
+                self.name1 = (contents.splitlines()[0].split(","))[0]
+                self.score1 = int((contents.splitlines()[0].split(","))[1])
+            if contents.splitlines()[1] != ",":
+                self.name2 = (contents.splitlines()[1].split(","))[0]
+                self.score2 = int((contents.splitlines()[1].split(","))[1])
+            self.highScores[self.name1] = self.score1
+            self.highScores[self.name2] = self.score2
         elif numScores == 3:
-            self.name1 = (contents.splitlines()[0].split(","))[0]
-            self.score1 = int((contents.splitlines()[0].split(","))[1])
-            self.name2 = (contents.splitlines()[1].split(","))[0]
-            self.score2 = int((contents.splitlines()[1].split(","))[1])
-            self.name3 = (contents.splitlines()[2].split(","))[0]
-            self.score3 = int((contents.splitlines()[2].split(","))[1])
+            if contents.splitlines()[0] != ",":
+                self.name1 = (contents.splitlines()[0].split(","))[0]
+                self.score1 = int((contents.splitlines()[0].split(","))[1])
+            if contents.splitlines()[1] != ",":
+                self.name2 = (contents.splitlines()[1].split(","))[0]
+                self.score2 = int((contents.splitlines()[1].split(","))[1])
+            if contents.splitlines()[2] != ",":
+                self.name3 = (contents.splitlines()[2].split(","))[0]
+                self.score3 = int((contents.splitlines()[2].split(","))[1])
+            self.highScores[self.name1] = self.score1
+            self.highScores[self.name2] = self.score2
+            self.highScores[self.name3] = self.score3
         print(f"{self.name1},{self.score1}")
         print(f"{self.name2},{self.score2}")
         print(f"{self.name3},{self.score3}")
+        print(self.highScores)
         self.scoreFile.close()
         
         self.obstaclesLst = []
@@ -188,8 +209,8 @@ class PygameGame(object):
                         self.passWord= ""
                     '''
                     # shortcut to profile mode
-                    if self.mode == "start" and event.key == pygame.K_SPACE:
-                        self.mode = "profile"
+                    #if self.mode == "start" and event.key == pygame.K_SPACE:
+                    #    self.mode = "profile"
                     #if self.mode == "profile" and event.key == pygame.K_s:
                         #print("enter game mode")
                         #self.mode = "game"
@@ -459,6 +480,7 @@ class PygameGame(object):
                                     self.numBullets = int(contents.splitlines()[2])
                                     self.highestScore = int(contents.splitlines()[3])
                                     self.mode = "profile"
+                                    print(self.name2, self.score2 ,self.score)
                                 else:
                                     self.printErrorIns = True
                                     self.passWord = ""
@@ -586,7 +608,7 @@ class PygameGame(object):
                         self.itemBoxes.add(currentItemBox)
                         #self.itemBoxesHitBoxes.append(currentItemBox.hitbox)
                         self.objects.add(currentItemBox)
-                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+4:
+                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+4 and self.score >= 800:
                     x = self.width * 3
                     y = random.randint(50, self.height - 50)
                     currentRocket = Rockets(x, y)
@@ -601,7 +623,7 @@ class PygameGame(object):
                         self.warningSigns.add(currentWarningSign)
                         self.warningSignsLst.append(currentWarningSign)
 
-                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+5:
+                elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+5 and self.score >= 500:
                     x = self.player.x
                     y = random.randint(50, self.height - 50)
                     currentLaser = Lasers(x, y)
@@ -624,6 +646,7 @@ class PygameGame(object):
                 if not self.player.isAlive and not self.moneyRecorded:
                     print("recorded")
                     self.document()
+                    self.gamePlayed = True
             self.redrawAll(screen)
             pygame.display.flip()
 
@@ -652,7 +675,30 @@ class PygameGame(object):
             print(self.highestScore)
         self.userFile.write(f'{self.highestScore}\r\n')
         self.userFile.close()
-        if self.score3 != None and self.userName != self.name3 and self.userName != self.name2 and self.userName != self.name1:
+        deletePlayer = None
+        recorded = False
+        for player in self.highScores:
+            # if user is already on the score board
+            if player == self.userName:
+                if self.highScores[player] < self.score:
+                    self.highScores[player] = self.score
+                    recorded = True
+                    print("record",self.highScores)
+                else:
+                    recorded = True
+        for player in self.highScores:
+            if self.highScores[player] < self.score and not recorded:
+                self.highScores[self.userName] = self.score
+                recorded = True
+                deletePlayer = player
+                print("replaced", self.highScores)
+        if len(self.highScores) < 3 and not recorded:
+            self.highScores[self.userName] = self.score
+            print("added", self.highScores)
+        if deletePlayer != None:
+            del self.highScores[deletePlayer]
+        '''
+        if self.score3 != "" and self.userName != self.name2 and self.userName != self.name1: #and self.userName != self.name3
             if self.score > self.score3:
                 if self.score > self.score2:
                     if self.score > self.score1:
@@ -667,10 +713,10 @@ class PygameGame(object):
                         self.name3 = self.name2
                         self.score2 = self.score
                         self.name2 = self.userName
-                else:
+                elif self.userName != self.score3:
                     self.score3 = self.score
                     self.name3 = self.userName
-        elif self.score2 != None and self.userName != self.name2 and self.userName != self.name1:
+        elif self.score2 != "" and self.userName != self.name1: #and self.userName != self.name2
             if self.score > self.score2:
                 if self.score > self.score1:
                     self.score3 = self.score2
@@ -684,10 +730,10 @@ class PygameGame(object):
                     self.name3 = self.name2
                     self.score2 = self.score
                     self.name2 = self.userName
-            else:
+            elif self.userName != self.name2:
                 self.score3 = self.score
-                self.name = self.userName
-        elif self.score1 != None and self.userName != self.name1:
+                self.name3 = self.userName
+        elif self.score1 != "" and self.userName != self.name1:
             if self.score > self.score1:
                 self.score2 = self.score1
                 self.name2 = self.name1
@@ -696,15 +742,46 @@ class PygameGame(object):
             else:
                 self.score2 = self.score
                 self.name2 = self.userName
-        else:
+        elif self.userName != self.name1 or (self.userName == self.name1 and self.score > self.score1):
             self.score1 = self.score
             self.name1 = self.userName
+        elif self.userName == self.name2 and self.score > self.score2:
+            self.score2 = self.score
+        elif self.userName == self.name3 and self.score > self.score3:
+            self.score3 = self.score
+        '''
+        print(self.userName, self.score)
         self.scoreFile = open('scoreBoard.txt', "a")
         self.scoreFile.seek(0)
         self.scoreFile.truncate()
-        self.scoreFile.write(f'{self.name1},{self.score1}\r\n')
-        self.scoreFile.write(f'{self.name2},{self.score2}\r\n')
-        self.scoreFile.write(f'{self.name3},{self.score3}\r\n')
+        # order the players based on their scores
+        print(len(self.highScores))
+        self.scoreLst = []
+        for name in self.highScores:
+            self.scoreLst.append(self.highScores[name])
+        print(self.scoreLst)
+        self.scoreLst.sort()
+        self.scoreLst.reverse()
+        print("sorted", self.scoreLst)
+        if len(self.scoreLst) > 0:
+            self.score1 = self.scoreLst[0]
+            if len(self.scoreLst) > 1:
+                self.score2 = self.scoreLst[1]
+                if len(self.scoreLst) > 2:
+                    self.score3 = self.scoreLst[2]
+        for name in self.highScores:
+            if self.highScores[name] == self.score1:
+                self.name1 = name
+            elif self.highScores[name] == self.score2:
+                self.name2 = name
+            elif self.highScores[name] == self.score3:
+                self.name3 = name
+        if self.name1 != "" and self.score1 != None:
+            self.scoreFile.write(f'{self.name1},{self.score1}\r\n')
+        if self.name2 != "" and self.score2 != None:
+            self.scoreFile.write(f'{self.name2},{self.score2}\r\n')
+        if self.name3 != "" and self.score3 != None:
+            self.scoreFile.write(f'{self.name3},{self.score3}\r\n')
         self.scoreFile.close()
         '''
         self.scoreFile = open(f'scoreBoard.txt', 'r')
