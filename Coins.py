@@ -47,7 +47,7 @@ class Coins(GameObject):
     def update(self, screenWidth, screenHeight, playerX, playerY, playerMode):
         if playerX - self.x - self.width / 2 > screenWidth / 2:
             self.kill()
-        if abs(self.x - playerX) <= screenWidth / 2 - 200 and abs(self.y - playerY) <= screenHeight / 2 - 100:
+        if abs(self.x - playerX) <= screenWidth / 2 - 170 and abs(self.y - playerY) <= screenHeight / 2 - 80:
             self.isVisible = True
         else:
             self.isVisible = False

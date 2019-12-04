@@ -19,7 +19,10 @@ class Game(PygameGame):
         self.bg = pygame.image.load("mountain.png")
         # image taken from: https://bevouliin.com/game-character-green-fur-monster-sprite-sheets/
         self.gameover = pygame.transform.scale(pygame.image.load("a1.png"), (60, 60))
+        # image taken from: https://upload.wikimedia.org/wikipedia/commons/3/30/HeartPic.png
         self.heart = pygame.transform.scale(pygame.image.load("heart.png"), (100, 100))
+        # image taken from: https://bevouliin.com/game-character-green-fur-monster-sprite-sheets/
+        self.bullet = pygame.transform.scale(pygame.image.load("bullet-A.png"), (70, 50))
         # original images created using Sketchpad: https://sketch.io/sketchpad/
         self.login = pygame.image.load("login.png")
         self.login = pygame.transform.scale(self.login, (90, 40))
@@ -32,6 +35,8 @@ class Game(PygameGame):
         self.pause = pygame.transform.scale(pygame.image.load("pause.png"), (90, 40))
         self.restart = pygame.transform.scale(pygame.image.load("restart.png"), (90, 40))
         self.purchase = pygame.transform.scale(pygame.image.load("purchase.png"), (90, 40))
+        self.scoreBoard = pygame.transform.scale(pygame.image.load("scoreBoard.png"), (90, 40))
+        self.help = pygame.transform.scale(pygame.image.load("help.png"), (90, 40))
         
         self.buttonWidth = 90
         self.buttonHeight = 40
@@ -43,7 +48,9 @@ class Game(PygameGame):
         self.oriScrollSpeed = self.scrollSpeed
         self.score = 0
         self.money = 0
-        pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(4000, 6000)) # random obstacle event
+        self.highestScore = 0
+        self.numBullets = 0
+        pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(3000, 5000)) # random obstacle event
         pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(2000, 5000)) # random coin event
         pygame.time.set_timer(pygame.USEREVENT+3, random.randrange(12000, 15000))# random item box event
         pygame.time.set_timer(pygame.USEREVENT+4, random.randrange(15000, 20000)) # random rocket event
@@ -59,18 +66,29 @@ class Game(PygameGame):
             screen.blit(self.restart, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 40))
             screen.blit(self.heart, (self.width / 2 - 220, self.height / 2 - 120))
             screen.blit(self.gameover, (self.width / 2 - 200, self.height / 2 - 100))
+            if self.printNewRecord:
+                recordFont = pygame.font.Font("Amatic-Bold.ttf", 20)
+                record = recordFont.render("congratulations! Your beat your highest score!", True, (0, 0, 0))
+                recordRect = record.get_rect()
+                recordRect.center = (self.width / 2, self.height / 2 - 76)
+                screen.blit(record, recordRect)
+            scoreFont = pygame.font.Font("Amatic-Bold.ttf", 18)
+            highScore = scoreFont.render(f'Your highest record: {self.highestScore}', True, (0, 0, 0))
+            highScoreRect = highScore.get_rect()
+            highScoreRect.center = (self.width / 2, self.height / 2 - 30)
+            screen.blit(highScore, highScoreRect)
             font = pygame.font.Font("Amatic-Bold.ttf", 50)
             text = font.render('GAME OVER', True, (0, 0, 0))
             textRect = text.get_rect()
-            textRect.center = (self.width / 2, self.height / 2 - 90)
+            textRect.center = (self.width / 2, self.height / 2 - 120)
             screen.blit(text, textRect)
-            scoreFont = pygame.font.Font("Amatic-Bold.ttf", 25)
+            #scoreFont = pygame.font.Font("Amatic-Bold.ttf", 25)
             score = scoreFont.render(f'Your score: {self.score}', True, (0, 0, 0))
             scoreRect = score.get_rect()
-            scoreRect.center = (self.width / 2, self.height / 2 - 40)
+            scoreRect.center = (self.width / 2, self.height / 2 - 50)
             screen.blit(score, scoreRect)
             purchaseFont = pygame.font.SysFont("comicsansms", 18)
-            purchase = purchaseFont.render("Purchase an extra life with 200 coins", True, (0,0,0))
+            purchase = purchaseFont.render("Continue game with 300 coins", True, (0,0,0))
             purchaseRect = purchase.get_rect()
             purchaseRect.center = (self.width / 2 - 170, self.height / 2)
             screen.blit(purchase, purchaseRect)
@@ -196,26 +214,39 @@ class Game(PygameGame):
             screen.blit(self.bg, (0, 0))
             screen.blit(self.logout, (680, 310))
             screen.blit(self.play, (680, 260))
-            #modeFont = pygame.font.Font("Amatic-Bold.ttf", 40)
-            #mode = modeFont.render("PROFILE", True, (0, 0, 0))
-            #modeRect = mode.get_rect()
-            #modeRect.center = (self.width / 2, self.height / 2 - 120)
-            #screen.blit(mode, modeRect)
+            screen.blit(self.bullet, (self.width / 2 - 35, self.height / 2 - 25))
+            screen.blit(self.purchase, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 60))
+            if self.insufficientCoins:
+                coinsInsFont = pygame.font.SysFont("comicsansms", 20)
+                coinsIns = coinsInsFont.render("Sorry, you don't have enough coins to make this purchase.", True, (255, 255, 255))
+                coinsInsRect = coinsIns.get_rect()
+                coinsInsRect.center = (self.width / 2, self.height / 2 + 120)
+                screen.blit(coinsIns, coinsInsRect)
+            bulletFont = pygame.font.Font("Amatic-Bold.ttf", 20)
+            bulletCount = bulletFont.render(f'Your bullets: {self.numBullets}', True, (0, 0, 0))
+            bulletRect = bulletCount.get_rect()
+            bulletRect.center = (self.width / 2, self.height / 2 - 65)
+            screen.blit(bulletCount, bulletRect)
             nameFont = pygame.font.Font("Amatic-Bold.ttf", 35)
             userName = nameFont.render(f'Welcome back {self.userName}!', True, (0, 0, 0))
             nameRect = userName.get_rect()
-            nameRect.center = (self.width / 2, self.height / 2 - 120)
+            nameRect.center = (self.width / 2, self.height / 2 - 130)
             screen.blit(userName, nameRect)
-            coinFont = pygame.font.Font("Amatic-Bold.ttf", 20)
+            coinFont = pygame.font.Font("Amatic-Bold.ttf", 18)
             coinText = coinFont.render(f'Your coins: {self.money}', True, (0, 0, 0))
             coinRect = coinText.get_rect()
-            coinRect.center = (self.width / 2, self.height / 2 - 80)
+            coinRect.center = (self.width / 2, self.height / 2 - 90)
             screen.blit(coinText, coinRect)
-            #messageFont = pygame.font.Font("Amatic-Bold.ttf", 20)
-            #message = messageFont.render("Profile mode waiting to be implemented. Press 's' to start the game", True, (0, 0, 0))
-            #messageRect = message.get_rect()
-            #messageRect.center = (self.width / 2, self.height / 2 + 50)
-            #screen.blit(message, messageRect)
+            messageFont = pygame.font.SysFont("comicsansms", 18)
+            message = messageFont.render("purchase bullets x 3 with 600 coins", True, (0, 0, 0))
+            messageRect = message.get_rect()
+            messageRect.center = (self.width / 2, self.height / 2 + 40)
+            screen.blit(message, messageRect)
+            scoreFont = pygame.font.Font("Amatic-Bold.ttf", 18)
+            highScore = scoreFont.render(f'Your highest record: {self.highestScore}', True, (0, 0, 0))
+            highScoreRect = highScore.get_rect()
+            highScoreRect.center = (self.width / 2, self.height / 2 - 40)
+            screen.blit(highScore, highScoreRect)
         
         # start screen
         if self.mode == "start":
@@ -232,6 +263,8 @@ class Game(PygameGame):
             #screen.blit(ins, insRect)
             screen.blit(self.login, (self.width / 2 - self.buttonWidth / 2, self.height / 2 - 20))
             screen.blit(self.register, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 30))
+            screen.blit(self.scoreBoard, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 80))
+            screen.blit(self.help, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 130))
             pygame.display.update()
 
         # paused mode
@@ -260,6 +293,9 @@ class Game(PygameGame):
             text = font.render(f'score: {self.score}', True, (0, 0, 0))
             textRect = text.get_rect()
             textRect.center = (40, 20)
+            bullets = font.render(f'bullets: {self.numBullets}', True, (0, 0, 0))
+            bulletRect = bullets.get_rect()
+            bulletRect.center = (40, 40)
             if self.player.mode != "invincible":
                 self.playerGroup.draw(screen)
             self.obstacles.draw(screen)
@@ -288,7 +324,41 @@ class Game(PygameGame):
             if self.player.mode == "invincible":
                 self.playerGroup.draw(screen)
             screen.blit(text, textRect)
+            screen.blit(bullets, bulletRect)
             screen.blit(self.pause, (670, 30))
+
+        if self.mode == "score board":
+            screen.blit(self.bg, (0, 0))
+            screen.blit(self.menu, (self.width / 2 - self.buttonWidth / 2, self.height - 100))
+            titleFont = pygame.font.Font("Amatic-Bold.ttf", 40)
+            title = titleFont.render("score board", True, (0, 0, 0))
+            titleRect = title.get_rect()
+            titleRect.center = (self.width / 2, 70)
+            screen.blit(title, titleRect)
+            scoreFont = pygame.font.Font("Amatic-Bold.ttf", 20)
+            if self.score1 != None:
+                score1 = scoreFont.render(f'#1 {self.name1}: {self.score1}', True, (0, 0, 0))
+                score1Rect = score1.get_rect()
+                score1Rect.midleft = (self.width / 2 - 40, 130)
+                screen.blit(score1, score1Rect)
+            if self.score2 != None:
+                score2 = scoreFont.render(f'#2 {self.name2}: {self.score2}', True, (0, 0, 0))
+                score2Rect = score2.get_rect()
+                score2Rect.midleft = (self.width / 2 - 40, 160)
+                screen.blit(score2, score2Rect)
+            if self.score3 != None:
+                score3 = scoreFont.render(f'#3 {self.name3}: {self.score3}', True, (0, 0, 0))
+                score3Rect = score3.get_rect()
+                score3Rect.midleft = (self.width / 2 - 40, 190)
+                screen.blit(score3, score3Rect) 
+        if self.mode == "help":
+            screen.blit(self.bg, (0, 0))
+            screen.blit(self.menu, (self.width / 2 - self.buttonWidth / 2, self.height - 100))
+            titleFont = pygame.font.Font("Amatic-Bold.ttf", 40)
+            title = titleFont.render("help screen", True, (0, 0, 0))
+            titleRect = title.get_rect()
+            titleRect.center = (self.width / 2, 70)
+            screen.blit(title, titleRect)
         pygame.display.update()
         
     def timerFired(self, dt):
@@ -347,7 +417,7 @@ class Game(PygameGame):
         
         if self.player.bullets != None and len(self.player.bullets) != 0:
             self.bulletGroup.add(self.player.bullets[-1])
-            self.bulletGroup.update(self.width, self.height)
+            self.bulletGroup.update(self.width, self.height, self.player)
 
         if self.player.magnet != None:
             self.magnetGroup = pygame.sprite.GroupSingle(self.player.magnet)
@@ -394,6 +464,15 @@ class Game(PygameGame):
             self.player.isAlive = False
             self.isPaused = True
             laser.kill()
+
+        if len(self.player.bullets) != 0:
+            for bullet in self.player.bullets:
+                for rocket in self.rockets:
+                    bullet.hitItem(rocket)
+                    #print("checked rocket")
+                for obstacle in self.obstacles:
+                    bullet.hitItem(obstacle)
+                    #print("checked obstacle")
         
     def keyPressed(self, keyCode, modifier):
         #print(keyCode)
@@ -405,10 +484,11 @@ class Game(PygameGame):
             #print(self.mode)
         elif keyCode == 112: #keyCode for "p" --> pause
             self.isPaused = not self.isPaused
-        elif not self.isPaused and keyCode == 32 and (self.player.mode == "fly"): #keyCode for the space bar
+        elif not self.isPaused and keyCode == 32 and (self.player.mode == "fly" or self.player.mode == "magnet suit") and self.numBullets > 0: #keyCode for the space bar
             self.player.mode = "attack"
             self.player.count = 0
             self.player.bullets.append(Bullets(self.player.x, self.player.y))
+            self.numBullets -= 1
             #print("space pressed", self.player.count)
     
     def restartSetup(self):
@@ -440,8 +520,14 @@ class Game(PygameGame):
         self.lasersPrepLst = []
         self.score = 0
         self.scrollSpeed = 3
+        self.oriScrollSpeed = 3
         self.moneyRecorded = False
+        self.insufficientCoins = False
+        self.printNewRecord = False
         self.mode = "game"
+        self.player.mode = "fly"
+        self.player.count = 0
+        self.player.magnet = None
 
     def mousePressed(self, x, y):
         if self.mode == "start":
@@ -455,6 +541,7 @@ class Game(PygameGame):
                 self.isTypingPW = True
                 self.userName = ""
                 self.passWord= ""
+                self.insufficientCoins = False
             # if register button is pressed
             elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                 and ((self.height / 2 + 30) <= y <= (self.height / 2 + self.buttonHeight + 30))):
@@ -465,6 +552,19 @@ class Game(PygameGame):
                 self.isTypingPW = True
                 self.userExist = False
                 self.registerSuccessful = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
+            # if score board button is pressed
+            elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
+                and ((self.height / 2 + 80) <= y <= (self.height / 2 + self.buttonHeight + 80))):
+                print("implement score board")
+                self.mode = "score board"
+                
+            # if help button is pressed
+            elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
+                and ((self.height / 2 + 130) <= y <= (self.height / 2 + self.buttonHeight + 130))):
+                print("implement help screen")
+                self.mode = "help"
         elif self.mode == "login":
             # if menu button is pressed
             if ((680 <= x <= 680 + self.buttonWidth) and (260 <= y <= 260 + self.buttonHeight)):
@@ -479,6 +579,8 @@ class Game(PygameGame):
                 self.printErrorIns = False
                 self.userExist = False
                 self.registerSuccessful = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
             # if register button is pressed
             elif ((680 <= x <= 680 + self.buttonWidth) and (310 <= y <= 310 + self.buttonHeight)):
                 self.mode = "register"
@@ -488,6 +590,8 @@ class Game(PygameGame):
                 self.isTypingPW = True
                 self.userExist = False
                 self.registerSuccessful = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
         elif self.mode == "register":
             # if menu button is pressed
             if ((680 <= x <= 680 + self.buttonWidth) and (260 <= y <= 260 + self.buttonHeight)):
@@ -502,6 +606,8 @@ class Game(PygameGame):
                 self.printErrorIns = False
                 self.userExist = False
                 self.registerSuccessful = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
             # if login button is pressed
             elif ((680 <= x <= 680 + self.buttonWidth) and (310 <= y <= 310 + self.buttonHeight)):
                 self.mode = "login"
@@ -511,6 +617,8 @@ class Game(PygameGame):
                 self.isTypingPW = True
                 self.userName = ""
                 self.passWord= ""
+                self.insufficientCoins = False
+                self.printNewRecord = False
         elif self.mode == "profile":
             # if logout button is pressed
             if ((680 <= x <= 680 + self.buttonWidth) and (310 <= y <= 310 + self.buttonHeight)):
@@ -525,15 +633,28 @@ class Game(PygameGame):
                 self.printErrorIns = False
                 self.userExist = False
                 self.registerSuccessful = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
             # if play button is pressed
             elif ((680 <= x <= 680 + self.buttonWidth) and (260 <= y <= 260 + self.buttonHeight)):
                 self.restartSetup()
+            # if purchase bullets button is pressed
+            elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
+                  and ((self.height / 2 + 60) <= y <= (self.height / 2 + self.buttonHeight + 60))):
+                if self.money < 600:
+                    print("no coins")
+                    self.insufficientCoins = True
+                else:
+                    self.money -= 600
+                    self.numBullets += 3
         elif self.isPaused:
             # if profile button is pressed
             if (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                 and ((self.height / 2 + 40) <= y <= (self.height / 2 + self.buttonHeight + 40))):
                 self.mode = "profile"
                 self.isPaused = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
             # if resume game button is pressed
             elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                 and ((self.height / 2 - 10) <= y <= (self.height / 2 + self.buttonHeight - 10))):
@@ -547,6 +668,40 @@ class Game(PygameGame):
             # if pause button is pressed
             if ((670 <= x <= 670 + self.buttonWidth) and (30 <= y <= 30 + self.buttonHeight)):
                 self.isPaused = True
+        elif self.mode == "score board":
+            if (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
+                and ((self.height - 100) <= y <= (self.height + self.buttonHeight - 100))):
+                self.userFile = None
+                self.userName = ""
+                self.passWord = ""
+                self.isTypingName = True
+                self.isTypingPW = True
+                self.recorded = False
+                self.printInvalidUserIns = False
+                self.printErrorIns = False
+                self.userExist = False
+                self.registerSuccessful = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
+                self.mode = "start"
+                
+        elif self.mode == "help":
+            if (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
+                and ((self.height - 100) <= y <= (self.height + self.buttonHeight - 100))):
+                self.userFile = None
+                self.userName = ""
+                self.passWord = ""
+                self.isTypingName = True
+                self.isTypingPW = True
+                self.recorded = False
+                self.printInvalidUserIns = False
+                self.printErrorIns = False
+                self.userExist = False
+                self.registerSuccessful = False
+                self.insufficientCoins = False
+                self.printNewRecord = False
+                self.mode = "start"
+
         if not self.player.isAlive:
             # if profile button is pressed
             if (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
@@ -564,9 +719,14 @@ class Game(PygameGame):
             elif ((self.width / 2 - 220) <= x <= (self.width / 2 - 220 + self.buttonWidth)
                   and ((self.height / 2 + 20) <= y <= (self.height / 2 + self.buttonHeight + 20))):
                 print("purchase life")
-                self.player.isAlive = True
-                self.isPaused = False
-                self.money -= 200
-                self.mode = "game"
+                if self.money < 300:
+                    self.insufficientCoins = True
+                else:
+                    self.player.isAlive = True
+                    self.isPaused = False
+                    #self.player.mode = "fly"
+                    self.money -= 300
+                    self.mode = "game"
+                    self.printNewRecord = False
         print(self.player.isAlive)
 Game(800, 390).run()

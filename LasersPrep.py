@@ -26,7 +26,7 @@ class LasersPrep(GameObject):
 
     def update(self, screenWidth, screenHeight, playerX, playerY):
         self.image = LasersPrep.sprite[self.count % 4]
-        if self.count >= 100:
+        if self.count >= 70:
             self.kill()
         self.count += 1
         super(LasersPrep, self).update(screenWidth, screenHeight, self.image)

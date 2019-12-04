@@ -22,12 +22,12 @@ class Lasers(GameObject):
         self.width, self.height = Lasers.sprite.get_size()
 
     def update(self, screenWidth, screenHeight, playerX, playerY):
-        if self.count <= 40:
+        if self.count <= 30:
             self.image = Lasers.transparent
         else:
             self.image = Lasers.sprite
             self.laserOn = True
-        if self.count >= 100:
+        if self.count >= 70:
             self.kill()
         self.count += 1
         super(Lasers, self).update(screenWidth, screenHeight, self.image)

@@ -88,7 +88,7 @@ class Player(GameObject):
                 Player.image = Player.attack[(self.count % 3)]
                 self.count += 1
             elif self.mode == "magnet suit":
-                if self.count >= 100:
+                if self.count >= 130:
                     #print("back to fly mode")
                     self.mode = "fly"
                     self.count = 0

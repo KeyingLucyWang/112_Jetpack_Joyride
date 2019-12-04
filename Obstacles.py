@@ -30,7 +30,7 @@ class Obstacles(GameObject):
         self.count = 0
         self.scroll = 0
         self.scrollY = 0
-        self.past = False
+        #self.past = False
         super(Obstacles, self).__init__(x, y, self.image)
 
     def update(self, screenWidth, screenHeight, playerX, playerY):
