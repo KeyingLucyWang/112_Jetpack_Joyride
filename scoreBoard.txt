@@ -1,3 +1,3 @@
-steve,4076
-lucy,1189
-lucysucks,657
+steve,6723
+mary,4857
+lucy,2431

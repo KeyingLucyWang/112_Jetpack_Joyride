@@ -39,6 +39,8 @@ class Game(PygameGame):
         self.purchase = pygame.transform.scale(pygame.image.load("purchase.png"), (90, 40))
         self.scoreBoard = pygame.transform.scale(pygame.image.load("scoreBoard.png"), (90, 40))
         self.help = pygame.transform.scale(pygame.image.load("help.png"), (90, 40))
+
+        self.helpScreen = pygame.transform.scale(pygame.image.load("help screen.png"), (550, 255))
         
         self.buttonWidth = 90
         self.buttonHeight = 40
@@ -315,12 +317,13 @@ class Game(PygameGame):
                 screen.blit(score3, score3Rect) 
         if self.mode == "help":
             screen.blit(self.bg, (0, 0))
-            screen.blit(self.menu, (self.width / 2 - self.buttonWidth / 2, self.height - 100))
+            screen.blit(self.menu, (self.width / 2 - self.buttonWidth / 2, self.height - 55))
             titleFont = pygame.font.Font("Amatic-Bold.ttf", 40)
             title = titleFont.render("help screen", True, (0, 0, 0))
             titleRect = title.get_rect()
-            titleRect.center = (self.width / 2, 70)
+            titleRect.center = (self.width / 2, 40)
             screen.blit(title, titleRect)
+            screen.blit(self.helpScreen, (125, 70))
         pygame.display.update()
         
     def timerFired(self, dt):
@@ -444,10 +447,8 @@ class Game(PygameGame):
             for bullet in self.player.bullets:
                 for rocket in self.rockets:
                     bullet.hitItem(rocket)
-                    #print("checked rocket")
                 for obstacle in self.obstacles:
                     bullet.hitItem(obstacle)
-                    #print("checked obstacle")
         
     def keyPressed(self, keyCode, modifier):
         if self.mode != "game":
@@ -541,7 +542,6 @@ class Game(PygameGame):
             # if help button is pressed
             elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                 and ((self.height / 2 + 130) <= y <= (self.height / 2 + self.buttonHeight + 130))):
-                print("implement help screen")
                 self.mode = "help"
         elif self.mode == "login":
             # if menu button is pressed
@@ -603,6 +603,8 @@ class Game(PygameGame):
             if ((680 <= x <= 680 + self.buttonWidth) and (310 <= y <= 310 + self.buttonHeight)):
                 if not self.gamePlayed:
                     self.document()
+                pygame.mixer.music.stop()
+                
                 self.mode = "start"
                 self.userFile = None
                 self.userName = ""
@@ -668,7 +670,7 @@ class Game(PygameGame):
                 
         elif self.mode == "help":
             if (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
-                and ((self.height - 100) <= y <= (self.height + self.buttonHeight - 100))):
+                and ((self.height - 55) <= y <= (self.height + self.buttonHeight - 55))):
                 self.userFile = None
                 self.userName = ""
                 self.passWord = ""

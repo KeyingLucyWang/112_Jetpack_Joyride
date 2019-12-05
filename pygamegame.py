@@ -587,14 +587,16 @@ class PygameGame(object):
                 if self.highScores[player] < self.score:
                     self.highScores[player] = self.score
                     recorded = True
-                    print("record",self.highScores)
                 else:
                     recorded = True
+        recordPlayer = None
         for player in self.highScores:
             if self.highScores[player] < self.score and not recorded:
-                self.highScores[self.userName] = self.score
+                recordPlayer = True
                 recorded = True
                 deletePlayer = player
+        if recordPlayer != None:
+            self.highScores[self.userName] = self.score
         if len(self.highScores) < 3 and not recorded:
             self.highScores[self.userName] = self.score
         if deletePlayer != None:
