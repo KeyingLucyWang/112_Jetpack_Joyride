@@ -2,6 +2,8 @@ import pygame
 import math
 from gameObject import GameObject
 
+# this is the Obstacles class that subclasses the GameObject class
+# import obstacle sprites and contain init and update methods
 class Obstacles(GameObject):
     @staticmethod
     def init():
@@ -26,11 +28,9 @@ class Obstacles(GameObject):
     def __init__(self, x, y):
         self.image = Obstacles.sprite[0]
         self.width, self.height = self.image.get_size()
-        #self.hitbox = Hitboxes(x, y, self.width, self.height, "obstacles")
         self.count = 0
         self.scroll = 0
         self.scrollY = 0
-        #self.past = False
         super(Obstacles, self).__init__(x, y, self.image)
 
     def update(self, screenWidth, screenHeight, playerX, playerY):

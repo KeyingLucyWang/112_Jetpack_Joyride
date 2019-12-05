@@ -2,6 +2,8 @@ import pygame
 import math
 from gameObject import GameObject
 
+# This is the Rocket class
+# important rocket image & __init__ and update() method
 class Rockets(GameObject):
     @staticmethod
     def init():

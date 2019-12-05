@@ -3,15 +3,16 @@ import random
 from pygamegame import PygameGame
 from Player import Player
 from Obstacles import Obstacles
-#from Hitboxes import Hitboxes
 from Coins import Coins
 from Bullets import Bullets
-#from Stars import Stars
 from ItemBoxes import ItemBoxes
 from Rockets import Rockets
 from Magnet import Magnet
 from WarningSigns import WarningSigns
 
+# the main Game file
+# define the Game Class that subclasses PygameGame Class
+# contains init, redrawAll, keyPressed, timerFired, mousePressed, and other methods
 class Game(PygameGame):
     def init(self):
         super().init()
@@ -23,6 +24,7 @@ class Game(PygameGame):
         self.heart = pygame.transform.scale(pygame.image.load("heart.png"), (100, 100))
         # image taken from: https://bevouliin.com/game-character-green-fur-monster-sprite-sheets/
         self.bullet = pygame.transform.scale(pygame.image.load("bullet-A.png"), (70, 50))
+
         # original images created using Sketchpad: https://sketch.io/sketchpad/
         self.login = pygame.image.load("login.png")
         self.login = pygame.transform.scale(self.login, (90, 40))
@@ -43,7 +45,6 @@ class Game(PygameGame):
         self.bgWidth = self.bg.get_width()
         self.bgX = 0
         self.bgX2 = self.bgWidth
-        #self.clock = pygame.time.Clock()
         self.scrollSpeed = 3
         self.oriScrollSpeed = self.scrollSpeed
         self.score = 0
@@ -51,17 +52,16 @@ class Game(PygameGame):
         self.money = 0
         self.highestScore = 0
         self.numBullets = 0
-        pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(2000, 3500)) # random obstacle event
-        pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(1000, 5000)) # random coin event
+        pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(1500, 3000)) # random obstacle event
+        pygame.time.set_timer(pygame.USEREVENT+2, random.randrange(1000, 4000)) # random coin event
         pygame.time.set_timer(pygame.USEREVENT+3, random.randrange(9000, 12000))# random item box event
         pygame.time.set_timer(pygame.USEREVENT+4, random.randrange(15000, 20000)) # random rocket event
         pygame.time.set_timer(pygame.USEREVENT+5, random.randrange(9000, 10000)) # random laser event
         
     def redrawAll(self, screen):
-        # text font from: https://www.fontsquirrel.com/fonts/amatic
+        # Amatic-Bold text font from: https://www.fontsquirrel.com/fonts/amatic
         # game over screen
-        if not self.player.isAlive: #self.playerGroup.sprite.isAlive:
-            #screen.fill((0, 0, 0))
+        if not self.player.isAlive:
             screen.blit(self.bg, (0, 0))
             screen.blit(self.profile, (self.width / 2 - self.buttonWidth / 2, self.height / 2 - 10))
             screen.blit(self.restart, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 40))
@@ -71,7 +71,7 @@ class Game(PygameGame):
                 recordFont = pygame.font.Font("Amatic-Bold.ttf", 20)
                 record = recordFont.render("congratulations! Your beat your highest score!", True, (0, 0, 0))
                 recordRect = record.get_rect()
-                recordRect.center = (self.width / 2, self.height / 2 - 76)
+                recordRect.center = (self.width / 2, self.height / 2 - 70)
                 screen.blit(record, recordRect)
             scoreFont = pygame.font.Font("Amatic-Bold.ttf", 18)
             highScore = scoreFont.render(f'Your highest record: {self.highestScore}', True, (0, 0, 0))
@@ -81,9 +81,12 @@ class Game(PygameGame):
             font = pygame.font.Font("Amatic-Bold.ttf", 50)
             text = font.render('GAME OVER', True, (0, 0, 0))
             textRect = text.get_rect()
-            textRect.center = (self.width / 2, self.height / 2 - 120)
+            textRect.center = (self.width / 2, self.height / 2 - 140)
             screen.blit(text, textRect)
-            #scoreFont = pygame.font.Font("Amatic-Bold.ttf", 25)
+            coin = scoreFont.render(f'your coins: {self.money}', True, (0, 0, 0))
+            coinRect = coin.get_rect()
+            coinRect.center = (self.width / 2, self.height / 2 - 90)
+            screen.blit(coin, coinRect)
             score = scoreFont.render(f'Your score: {self.score}', True, (0, 0, 0))
             scoreRect = score.get_rect()
             scoreRect.center = (self.width / 2, self.height / 2 - 50)
@@ -94,6 +97,11 @@ class Game(PygameGame):
             purchaseRect.center = (self.width / 2 - 170, self.height / 2)
             screen.blit(purchase, purchaseRect)
             screen.blit(self.purchase, (self.width / 2 - 220, self.height / 2 + 20))
+            if self.insufficientCoins:
+                noCoin = purchaseFont.render("Sorry, you don't have enough coins", True, (0, 0, 0))
+                noCoinRect = noCoin.get_rect()
+                noCoinRect.center = (self.width / 2 - 170, self.height / 2 + 80)
+                screen.blit(noCoin, noCoinRect)
             pygame.display.update()
             return
 
@@ -101,7 +109,6 @@ class Game(PygameGame):
             screen.blit(self.bg, (0, 0))
             screen.blit(self.login, (680, 310))
             screen.blit(self.menu, (680, 260))
-            #screen.fill((0, 0, 0))
             if self.userExist or self.registerSuccessful:
                 textFont = pygame.font.SysFont("comicsansms", 20)
                 if self.userExist:
@@ -143,7 +150,6 @@ class Game(PygameGame):
 
         # login screen
         if self.mode == "login":
-            #screen.fill((0, 0, 0))
             screen.blit(self.bg, (0, 0))
             screen.blit(self.register, (680, 310))
             screen.blit(self.menu, (680, 260))
@@ -159,28 +165,6 @@ class Game(PygameGame):
                 textRect = text.get_rect()
                 textRect.center = (self.width / 2, self.height / 2 - 10)
                 screen.blit(text, textRect)
-            '''
-            modeFont = pygame.font.SysFont("comicsansms", 30)
-            mode = modeFont.render("LOGIN", True, (0, 0, 0))
-            modeRect = mode.get_rect()
-            modeRect.center = (self.width / 2, self.height / 2 - 70)
-            screen.blit(mode, modeRect)
-            textFont = pygame.font.SysFont("comicsansms", 20)
-            prompt = textFont.render("Please type in your username and password. Press enter to confirm.", True, (0, 0, 0))
-            promptRect = prompt.get_rect()
-            promptRect.center = (self.width / 2, self.height / 2 - 20)
-            screen.blit(prompt, promptRect)
-            nameFont = pygame.font.SysFont("comicsansms", 20)
-            userName = nameFont.render(f'Username: {self.userName}', True, (0, 0, 0))
-            nameRect = userName.get_rect()
-            nameRect.center = (self.width / 2, self.height / 2)
-            screen.blit(userName, nameRect)
-            pwFont = pygame.font.SysFont("comicsansms", 20)
-            password = pwFont.render(f'Password: {self.passWord}', True, (0, 0, 0))
-            pwRect = password.get_rect()
-            pwRect.center = (self.width / 2, self.height / 2 + 20)
-            screen.blit(password, pwRect)
-            '''
             modeFont = pygame.font.SysFont("comicsansms", 35)
             mode = modeFont.render("LOGIN", True, (0, 0, 0))
             modeRect = mode.get_rect()
@@ -211,7 +195,6 @@ class Game(PygameGame):
             screen.blit(userPWPrompt, pwPromptRect)
     
         if self.mode == "profile":
-            #screen.fill((0, 0, 0))
             screen.blit(self.bg, (0, 0))
             screen.blit(self.logout, (680, 310))
             screen.blit(self.play, (680, 260))
@@ -239,7 +222,7 @@ class Game(PygameGame):
             coinRect.center = (self.width / 2, self.height / 2 - 90)
             screen.blit(coinText, coinRect)
             messageFont = pygame.font.SysFont("comicsansms", 18)
-            message = messageFont.render("purchase bullets x 3 with 600 coins", True, (0, 0, 0))
+            message = messageFont.render("purchase bullets x 3 with 500 coins", True, (0, 0, 0))
             messageRect = message.get_rect()
             messageRect.center = (self.width / 2, self.height / 2 + 40)
             screen.blit(message, messageRect)
@@ -257,11 +240,6 @@ class Game(PygameGame):
             titleRect = title.get_rect()
             titleRect.center = (self.width / 2, self.height / 2 - 70)
             screen.blit(title, titleRect)
-            #insFont = pygame.font.Font("Amatic-Bold.ttf", 25)
-            #ins = insFont.render('Press "space" to register! Press "escape" to log in!', True, (0, 0, 0))
-            #insRect = ins.get_rect()
-            #insRect.center = (self.width / 2, self.height / 2)
-            #screen.blit(ins, insRect)
             screen.blit(self.login, (self.width / 2 - self.buttonWidth / 2, self.height / 2 - 20))
             screen.blit(self.register, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 30))
             screen.blit(self.scoreBoard, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 80))
@@ -270,20 +248,15 @@ class Game(PygameGame):
 
         # paused mode
         if self.isPaused:
-            #screen.fill((255, 255, 255))
             screen.blit(self.bg, (0, 0))
             screen.blit(self.resume, (self.width / 2 - self.buttonWidth / 2, self.height / 2 - 10))
             screen.blit(self.profile, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 40))
             screen.blit(self.restart, (self.width / 2 - self.buttonWidth / 2, self.height / 2 + 90))
             pauseFont = pygame.font.Font("Amatic-Bold.ttf", 50)
             pause = pauseFont.render('GAME PAUSED', True, (0, 0, 0))
-            #pauseIns = pauseFont.render('Hit "p" to unpause', True, (0, 0, 0))
             pauseRect = pause.get_rect()
             pauseRect.center = (self.width / 2, self.height / 2 - 80)
-            #pauseInsRect = pauseIns.get_rect()
-            #pauseInsRect.center = (self.width / 2, self.height / 2)
             screen.blit(pause, pauseRect)
-            #screen.blit(pauseIns, pauseInsRect)
             pygame.display.update()
 
         # game mode
@@ -300,24 +273,12 @@ class Game(PygameGame):
             if self.player.mode != "invincible":
                 self.playerGroup.draw(screen)
             self.obstacles.draw(screen)
-            #print(self.stars)
             self.coins.draw(screen)
             self.itemBoxes.draw(screen)
             if self.player.bullets != None and len(self.player.bullets) != 0:
                 self.bulletGroup.draw(screen)
             if self.player.magnet != None:
                 self.magnetGroup.draw(screen)
-            '''
-            if len(self.starsLst) != 0:
-                for star in self.starsLst:
-                    # print(star, star.show)
-                    if star.show:
-                        #print("draw star")
-                        self.stars.draw(screen)
-                    #print(star.x, star.y)
-                #print(self.player.x, self.player.y)     
-            #pygame.display.update()
-            '''
             self.lasers.draw(screen)
             self.lasersPrep.draw(screen)
             self.rockets.draw(screen)
@@ -401,22 +362,17 @@ class Game(PygameGame):
             obstacle.x -= self.scrollSpeed
         for coin in self.coins:
             coin.x -= self.scrollSpeed
-        #for star in self.stars:
-            #star.x -= self.scrollSpeed
         for itemBox in self.itemBoxes:
             itemBox.x -= self.scrollSpeed
             
-        #self.obstacles.update(self.width, self.height)
         self.obstacles.update(self.width, self.height, self.player.x, self.player.y)
         self.playerGroup.update(dt, self.isKeyPressed, self.width, self.height)
         self.coins.update(self.width, self.height, self.player.x, self.player.y, self.player.mode)
-        #self.stars.update(self.width, self.height)
         self.itemBoxes.update(self.width, self.height, self.player.x, self.player.y)
         self.warningSigns.update(self.width, self.height)
         self.rockets.update(self.width, self.height, self.player.x, self.player.y)
         self.lasersPrep.update(self.width, self.height, self.player.x, self.player.y)
         self.lasers.update(self.width, self.height, self.player.x, self.player.y)
-        #self.hitboxes.update(self.width, self.height)
         
         if self.player.bullets != None and len(self.player.bullets) != 0:
             self.bulletGroup.add(self.player.bullets[-1])
@@ -429,34 +385,46 @@ class Game(PygameGame):
         (boolObstacle, obstacle) = self.player.collide(self.obstacles)
         if self.player.mode != "invincible" and obstacle != None:
             self.moneyRecorded = False
+            # modified code from: https://nerdparadise.com/programming/pygame/part3
+            pygame.mixer.Channel(0).play(pygame.mixer.Sound(self.collisionSound),maxtime=600)
+            pygame.mixer.music.stop()
+            
             self.player.isAlive = False
             self.isPaused = True
             obstacle.kill()
-            #print(f"collide with obstacle {obstacle}")
             
         (boolCoin, coins) = self.player.collideCoins(self.coins)
         if coins != None:
             for coin in coins:
                 if not coin.hit:
+                    # modified code from: https://nerdparadise.com/programming/pygame/part3
+                    pygame.mixer.Channel(2).play(pygame.mixer.Sound(self.coinSound),maxtime=600)
+
                     self.score += 20
                     coin.hit = True
                     coin.count = 0
-            #print(f"collide with coin {coin}")
 
         (boolItemBox, itemBox) = self.player.collide(self.itemBoxes)
-        if self.player.mode != "invincible" and itemBox != None:
-           #print("invincible mode entered")
+        if self.player.mode != "invincible" and self.player.mode != "magnet suit" and itemBox != None:
             self.player.mode = itemBox.itemType
-            #print(self.player.mode)
             self.player.count = 0
             itemBox.hit = True
             itemBox.kill()
             if self.player.mode == "magnet suit":
+                # modified code from: https://nerdparadise.com/programming/pygame/part3
+                pygame.mixer.Channel(4).play(pygame.mixer.Sound(self.magnetSound),maxtime=2000)
+
                 self.player.magnet = Magnet(self.player.x, self.player.y)
+            elif self.player.mode == "invincible":
+                pygame.mixer.Channel(4).play(pygame.mixer.Sound(self.invincibleSound),maxtime=2000)
 
         (boolRocket, rocket) = self.player.collide(self.rockets)
         if self.player.mode != "invincible" and rocket != None:
             self.moneyRecorded = False
+            # modified code from: https://nerdparadise.com/programming/pygame/part3
+            pygame.mixer.Channel(0).play(pygame.mixer.Sound(self.collisionSound),maxtime=600)
+            pygame.mixer.music.stop()
+            
             self.player.isAlive = False
             self.isPaused = True
             rocket.kill()
@@ -464,6 +432,10 @@ class Game(PygameGame):
         (boolLaser, laser) = self.player.collide(self.lasers)
         if self.player.mode != "invincible" and laser != None and laser.laserOn:
             self.moneyRecorded = False
+            # modified code from: https://nerdparadise.com/programming/pygame/part3
+            pygame.mixer.Channel(0).play(pygame.mixer.Sound(self.collisionSound),maxtime=600)
+            pygame.mixer.music.stop()
+            
             self.player.isAlive = False
             self.isPaused = True
             laser.kill()
@@ -478,21 +450,22 @@ class Game(PygameGame):
                     #print("checked obstacle")
         
     def keyPressed(self, keyCode, modifier):
-        #print(keyCode)
         if self.mode != "game":
             return
         if keyCode == 114: #keyCode for "r" --> restart
             self.init()
             self.__init__(800, 390)
-            #print(self.mode)
         elif keyCode == 112: #keyCode for "p" --> pause
             self.isPaused = not self.isPaused
         elif not self.isPaused and keyCode == 32 and (self.player.mode == "fly" or self.player.mode == "magnet suit") and self.numBullets > 0: #keyCode for the space bar
             self.player.mode = "attack"
             self.player.count = 0
+            
+            # modified code from: https://nerdparadise.com/programming/pygame/part3
+            pygame.mixer.Channel(1).play(pygame.mixer.Sound(self.shootingSound),maxtime=600)
+            
             self.player.bullets.append(Bullets(self.player.x, self.player.y))
             self.numBullets -= 1
-            #print("space pressed", self.player.count)
     
     def restartSetup(self):
         for obstacle in self.obstacles:
@@ -513,6 +486,9 @@ class Game(PygameGame):
             laser.kill()
         for laserPrep in self.lasersPrep:
             laserPrep.kill()
+        # modified code from: https://nerdparadise.com/programming/pygame/part3
+        pygame.mixer.music.play(loops=-1)
+        
         self.isPaused = False
         self.obstaclesLst = []
         self.coinsLst = []
@@ -560,7 +536,6 @@ class Game(PygameGame):
             # if score board button is pressed
             elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                 and ((self.height / 2 + 80) <= y <= (self.height / 2 + self.buttonHeight + 80))):
-                print("implement score board")
                 self.mode = "score board"
                 
             # if help button is pressed
@@ -626,10 +601,8 @@ class Game(PygameGame):
         elif self.mode == "profile":
             # if logout button is pressed
             if ((680 <= x <= 680 + self.buttonWidth) and (310 <= y <= 310 + self.buttonHeight)):
-                print("log out pressed", self.name2, self.score2, self.score)
                 if not self.gamePlayed:
                     self.document()
-                print("after document", self.name2, self.score2, self.score)
                 self.mode = "start"
                 self.userFile = None
                 self.userName = ""
@@ -650,11 +623,10 @@ class Game(PygameGame):
             # if purchase bullets button is pressed
             elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                   and ((self.height / 2 + 60) <= y <= (self.height / 2 + self.buttonHeight + 60))):
-                if self.money < 600:
-                    print("no coins")
+                if self.money < 500:
                     self.insufficientCoins = True
                 else:
-                    self.money -= 600
+                    self.money -= 500
                     self.numBullets += 3
         elif self.isPaused:
             # if profile button is pressed
@@ -716,26 +688,29 @@ class Game(PygameGame):
             if (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                 and ((self.height / 2 - 10) <= y <= (self.height / 2 + self.buttonHeight - 10))):
                 self.mode = "profile"
-                print("profile mode")
                 self.isPaused = False
                 self.player.isAlive = True
+                self.insufficientCoins = False
             # if restart button is pressed
             elif (((self.width / 2 - self.buttonWidth / 2) <= x <= (self.width / 2 + self.buttonWidth / 2))
                 and ((self.height / 2 + 40) <= y <= (self.height / 2 + self.buttonHeight + 40))):
-                print("restart")
                 self.restartSetup()
                 self.player.isAlive = True
+            # if purchase button is pressed
             elif ((self.width / 2 - 220) <= x <= (self.width / 2 - 220 + self.buttonWidth)
                   and ((self.height / 2 + 20) <= y <= (self.height / 2 + self.buttonHeight + 20))):
-                print("purchase life")
                 if self.money < 300:
                     self.insufficientCoins = True
                 else:
+                    # modified code from: https://nerdparadise.com/programming/pygame/part3
+                    pygame.mixer.music.play(loops=-1)
+                    
                     self.player.isAlive = True
                     self.isPaused = False
                     #self.player.mode = "fly"
                     self.money -= 300
+                    self.money -= self.score // 10
                     self.mode = "game"
                     self.printNewRecord = False
-        print(self.player.isAlive)
+
 Game(800, 390).run()

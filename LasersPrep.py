@@ -2,6 +2,8 @@ import pygame
 import math
 from gameObject import GameObject
 
+# this is the LasersPrep class that subclasses the GameObject class
+# import lasers-prep sprites and contain init and update methods
 class LasersPrep(GameObject):
     @staticmethod
     def init():

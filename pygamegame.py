@@ -1,12 +1,9 @@
-# modified code taken from: http://blog.lukasperaza.com/getting-started-with-pygame/
 import pygame
 import random
 import os
 from Player import Player
 from Obstacles import Obstacles
 from Coins import Coins
-#from Hitboxes import Hitboxes
-#from Stars import Stars
 from ItemBoxes import ItemBoxes
 from Rockets import Rockets
 from pygame.locals import *
@@ -15,12 +12,14 @@ from Lasers import Lasers
 from LasersPrep import LasersPrep
 from Bullets import Bullets
 
+# modified code taken from: http://blog.lukasperaza.com/getting-started-with-pygame/
+# this is the PygameGame class
+# establish the backbone and skeleton methods for the Game class
+# import audio files and load saved state files
 class PygameGame(object):
-
     def init(self):
         Obstacles.init()
         self.obstacles = pygame.sprite.Group()
-        #pygame.time.set_timer(pygame.USEREVENT+1, random.randrange(2000, 3500))
         Player.init()
         self.player = Player(self.width / 2, self.height / 2)
         self.playerGroup = pygame.sprite.GroupSingle(self.player)
@@ -64,7 +63,6 @@ class PygameGame(object):
         pass
 
     def isKeyPressed(self, key):
-        ''' return whether a specific key is being held '''
         return self._keys.get(key, False)
 
     def __init__(self, width=600, height=400, fps=60, title="112 Jetpack Joyride"):
@@ -76,8 +74,6 @@ class PygameGame(object):
         self.isPaused = False
 
         # initialize user text file
-        #self.loginText = open("loginText.txt","a+")
-        #self.loginText.close()
         self.userFile = None
         self.userName = ""
         self.passWord = ""
@@ -93,6 +89,43 @@ class PygameGame(object):
         self.bulletRecorded = False
         self.printNewRecord = False
         self.gamePlayed = False
+
+        # load background music
+        # downloaded from: http://23.237.126.42/ost/jetpack-joyride/nrledqme/Jetpack%20Joyride.mp3
+        pygame.mixer.init()
+        pygame.mixer.music.load('media.io_Jetpack Joyride.wav')
+        pygame.mixer.music.set_volume(0.6)
+        
+        #pygame.mixer.music.play(loops=-1)
+        # load collision sound
+        # downloaded from: https://www.freesoundeffects.com/free-sounds/explosion-10070/
+        self.collisionSound = pygame.mixer.Sound("Explosion+8.wav")
+        
+        # load laser sound
+        # downloaded from: http://d-gun.com/files/sounds/LASRLIT2.WAV
+        self.laserSound = pygame.mixer.Sound("LASRLIT2.wav")
+        
+        # load shooting sound
+        # downloaded from: https://www.freesoundeffects.com/free-sounds/gun-10081/
+        self.shootingSound = pygame.mixer.Sound('Gun+Silencer.wav')
+        
+        # load collecting coins sound
+        # downloaded from: https://www.soundjay.com/coin-sounds-1.html
+        self.coinSound = pygame.mixer.Sound("coins-in-hand-4.wav")
+        self.coinSound.set_volume(1.0)
+        
+        # load rocket sound
+        # downloaded from: https://www.freesoundeffects.com/free-sounds/missile-10071/
+        self.rocketSound = pygame.mixer.Sound("Missile+2.wav")
+        self.rocketSound.set_volume(1.0)
+        
+        # load magnetic sound
+        # downloaded from: https://www.freesoundeffects.com/free-sounds/electric-sounds-10032/1/tot_sold/50/
+        self.magnetSound = pygame.mixer.Sound('electriccurrent.wav')
+        
+        # load invinible mode sound
+        # downloaded from: https://www.freesoundeffects.com/free-sounds/airplane-10004/
+        self.invincibleSound = pygame.mixer.Sound('airstrike.wav')
         
         # score board
         self.highScores = dict()
@@ -106,9 +139,7 @@ class PygameGame(object):
         self.scoreFile = None
         self.scoreFile = open("scoreBoard.txt", "r")
         contents = self.scoreFile.read()
-        print(contents)
         numScores = len(contents.splitlines())
-        print(numScores)
         if numScores == 1 and contents.splitlines()[0] != ",":
             self.name1 = (contents.splitlines()[0].split(","))[0]
             self.score1 = int((contents.splitlines()[0].split(","))[1])
@@ -135,22 +166,13 @@ class PygameGame(object):
             self.highScores[self.name1] = self.score1
             self.highScores[self.name2] = self.score2
             self.highScores[self.name3] = self.score3
-        print(f"{self.name1},{self.score1}")
-        print(f"{self.name2},{self.score2}")
-        print(f"{self.name3},{self.score3}")
-        print(self.highScores)
         self.scoreFile.close()
         
         self.obstaclesLst = []
-        #self.obstacleHitboxes = []
         
         self.coinsLst = []
-        #self.coinsHitboxes = []
-        
-        #self.starsLst = []
-        
+                
         self.itemBoxesLst = []
-        #self.itemBoxesHitBoxes = []
 
         self.rocketsLst = []
         self.warningSignsLst = []
@@ -164,14 +186,12 @@ class PygameGame(object):
     def run(self):
         clock = pygame.time.Clock()
         screen = pygame.display.set_mode((self.width, self.height))
-        # set the title of the window
         screen.set_alpha(None)
         pygame.display.set_caption(self.title)
 
         # stores all the keys currently being held down
         self._keys = dict()
 
-        # call game-specific initialization
         self.init()
         playing = True
         while playing:
@@ -190,33 +210,6 @@ class PygameGame(object):
                     self.mouseDrag(*(event.pos))
                 elif event.type == pygame.KEYDOWN:
                     self._keys[event.key] = True
-                    '''
-                    if (self.mode == "start" and event.key == pygame.K_SPACE) or (self.mode == "login" and event.key == pygame.K_SPACE):
-                        self.mode = "register"
-                        self.userName = ""
-                        self.passWord= ""
-                        self.isTypingName = True
-                        self.isTypingPW = True
-                        self.userExist = False
-                        self.registerSuccessful = False
-                    elif (self.mode == "start" and event.key == pygame.K_ESCAPE) or (self.mode == "register" and event.key == pygame.K_SPACE):
-                        self.mode = "login"
-                        self.printInvalidUserIns = False
-                        self.printErrorIns = False
-                        self.isTypingName = True
-                        self.isTypingPW = True
-                        self.userName = ""
-                        self.passWord= ""
-                    '''
-                    # shortcut to profile mode
-                    #if self.mode == "start" and event.key == pygame.K_SPACE:
-                    #    self.mode = "profile"
-                    #if self.mode == "profile" and event.key == pygame.K_s:
-                        #print("enter game mode")
-                        #self.mode = "game"
-                    #if self.mode == "start" and (event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT):
-                        #print("enter game mode")
-                        #self.mode = "game"
                     self.keyPressed(event.key, event.mod)
                 elif event.type == pygame.KEYUP:
                     self._keys[event.key] = False
@@ -302,38 +295,19 @@ class PygameGame(object):
                             self.userName = self.userName[:-1]
                         if event.key == pygame.K_RETURN:
                             if self.mode == "register":
-                                #self.loginText = open("loginText.txt", "r")
-                                print(f'userLogin/{self.userName}.txt')
-                                #cleared what was in the text file everytime it is opened
                                 self.userFile = open(f'userLogin/{self.userName}.txt', "a+")
                                 self.userFile.close()
                                 self.userFile = open(f'userLogin/{self.userName}.txt', "r")
                                 if self.userFile.mode == "r":
-                                    print(f"userLogin/{self.userName}.txt")
-                                    print(os.path.getsize(f"userLogin/{self.userName}.txt"))
                                     if os.path.getsize(f"userLogin/{self.userName}.txt") != 0:
-                                        print("user exists")
                                         self.userExist = True
                                     else:
                                         self.userExist = False
                                         contents = self.userFile.read()
-                                #if contents != None or contents.strip() != "":
-                                    #print("user exists")
-                                    #self.userExist = True
-                                '''
-                                for line in contents.splitlines():
-                                    data = line.split(",")
-                                    if self.userName == data[0]:
-                                        print("user exists")
-                                        self.userExist = True
-                                '''
                             if not self.userExist:
-                                print("type password")
                                 self.isTypingName = False
                             else:
-                                print("clear")
                                 self.userName = ""
-                            #self.userFile.close()
                             
                     elif self.isTypingPW:
                         if event.key == pygame.K_a:
@@ -414,106 +388,41 @@ class PygameGame(object):
                             self.isTypingPW = False
                             
                     if self.mode == "register" and not self.isTypingPW and not self.isTypingName and not self.recorded:
-                        #self.userFile = open(f'userLogin/{self.userName}.txt', "r+")
-                        #if self.userFile.mode == "r+":
-                        #    contents = self.userFile.read()
-                        #if self.userFile != None and self.userFile != "":
-                        #    print("user exists")
-                        #    self.userExist = True
-                        #else:
-                        #    self.userExist = False
-                        #self.userFile.close()
-                        '''
-                        self.loginText = open("loginText.txt", "r")
-                        if self.loginText.mode == "r":
-                            contents = self.loginText.read()
-                        for line in contents.splitlines():
-                            data = line.split(",")
-                            if self.userName == data[0]:
-                                print("user exists")
-                                self.userExist = True
-                        '''
                         if not self.userExist:
-                            #self.loginText = open("loginText.txt", "a+")
                             self.userFile = open(f'userLogin/{self.userName}.txt', "a+")
-                            #self.loginText.write(f"{self.userName},{self.passWord}\r\n")
                             self.userFile.write(f'{self.passWord}\r\n')
                             self.userFile.write('0\r\n')
                             self.userFile.write('0\r\n')
                             self.userFile.write('0\r\n')
-                            #self.loginText.close()
                             self.userFile.close()
                             self.recorded = True
-                            print("recorded")
                             self.registerSuccessful = True
                         self.userName = ""
                         self.passWord= ""
 
                     if self.mode == "login" and not self.isTypingName: #and not self.isTypingPW:
-                        #self.loginText = open("loginText.txt", "r")
                         self.userFile = open(f'userLogin/{self.userName}.txt', 'a+')
                         self.userFile.close()
                         self.userFile = open(f'userLogin/{self.userName}.txt', 'r')
                         if self.userFile.mode == "r":
-                            print("enter read")
                             if os.path.getsize(f'userLogin/{self.userName}.txt') == 0:
-                                print("user not found")
                                 self.printInvalidUserIns = True
                                 self.userName = ""
                                 self.passWord = ""
                                 self.isTypingName = True
-                        #if contents == None or contents == "":
-                            #print("user not found")
-                            #self.printInvalidUserIns = True
-                            #self.userName = ""
-                            #self.passWord = ""
-                            #self.mode = "register"
                             elif not self.isTypingPW:
                                 contents = self.userFile.read()
-                                #print(contents)
-                                #for line in contents.splitlines():
                                 line = contents.splitlines()[0]
                                 if self.passWord == line.strip():
-                                    print("profile mode")
-                                    print(int(contents.splitlines()[1]))
                                     self.money = int(contents.splitlines()[1])
                                     self.numBullets = int(contents.splitlines()[2])
                                     self.highestScore = int(contents.splitlines()[3])
                                     self.mode = "profile"
-                                    print(self.name2, self.score2 ,self.score)
                                 else:
                                     self.printErrorIns = True
                                     self.passWord = ""
                                     self.isTypingPW = True
                         self.userFile.close()
-                        '''
-                        pw = ""
-                        for line in contents.splitlines():
-                            data = line.split(",")
-                            print(data)
-                            #print(data[0], data[1])
-                            if self.userName == data[0]:
-                                pw = data[1]
-                        if pw == "":
-                            print("user not found")
-                            self.printInvalidUserIns = True
-                            self.userName = ""
-                            self.passWord = ""
-                            #self.mode = "register"
-                        else:
-                            if self.passWord == pw:
-                                print("profile mode")
-                                self.mode = "profile"
-                            else:
-                                self.printErrorIns = True
-                                self.passWord = ""
-                                self.isTypingPW = True
-                        self.loginText.close()
-                    '''
-                    #if not self.isTypingName:
-                    #    print("userName", self.userName)
-                    #if not self.isTypingPW:
-                    #    print("PW", self.passWord)
                 elif event.type == pygame.QUIT:
                     playing = False
                 elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+1:
@@ -539,7 +448,6 @@ class PygameGame(object):
                     if add:
                         self.obstaclesLst.append(currentObstacle)
                         self.obstacles.add(currentObstacle)
-                        #self.obstacleHitboxes.append(currentObstacle.hitbox)
                         self.objects.add(currentObstacle)
                 elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+2:
                     startX = 0
@@ -560,14 +468,11 @@ class PygameGame(object):
                     coinShape = random.choice(["lines", "heart"])
                     newCoins = []
                     if coinShape == "lines":
-                        #print(Coins.lines)
                         for (xcor, ycor) in Coins.lines:
-                            #print("coin created")
                             newCoin = Coins(startX + xcor, y + ycor)
                             newCoins.append(newCoin)
                     elif coinShape == "heart":
                         for (xcor, ycor) in Coins.heart:
-                            #print("coin created")
                             newCoin = Coins(startX + xcor, y + ycor)
                             newCoins.append(newCoin)
                     add = True
@@ -577,10 +482,8 @@ class PygameGame(object):
                                 add = False
                     if add:
                         for coin in newCoins:
-                            #print("coins added")
                             self.coinsLst.append(coin)
                             self.coins.add(coin)
-                            #self.coinsHitboxes.append(coin.hitbox)
                             self.objects.add(coin)
                 elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+3:
                     if len(self.itemBoxesLst) == 0:
@@ -606,7 +509,6 @@ class PygameGame(object):
                     if add:
                         self.itemBoxesLst.append(currentItemBox)
                         self.itemBoxes.add(currentItemBox)
-                        #self.itemBoxesHitBoxes.append(currentItemBox.hitbox)
                         self.objects.add(currentItemBox)
                 elif not self.isPaused and self.mode == "game" and event.type == pygame.USEREVENT+4 and self.score >= 800:
                     x = self.width * 3
@@ -617,6 +519,9 @@ class PygameGame(object):
                         if abs(currentRocket.y - laser.y) < 10:
                             add = False
                     if add:
+                        # modified code from: https://nerdparadise.com/programming/pygame/part3
+                        pygame.mixer.Channel(3).play(pygame.mixer.Sound(self.rocketSound),maxtime=1000)
+                        
                         self.rockets.add(currentRocket)
                         self.rocketsLst.append(currentRocket)
                         currentWarningSign = WarningSigns(self.width - 30, y)
@@ -632,6 +537,9 @@ class PygameGame(object):
                         if abs(currentLaser.y - rocket.y) < 10:
                             add = False
                     if add:
+                        # modified code from: https://nerdparadise.com/programming/pygame/part3
+                        pygame.mixer.Channel(0).play(pygame.mixer.Sound(self.laserSound))
+                        
                         self.lasers.add(currentLaser)
                         self.lasersLst.append(currentLaser)
                         prepX1 = x - 340
@@ -644,7 +552,6 @@ class PygameGame(object):
                         self.lasersPrepLst.append(currentLasersPrep2)
     
                 if not self.player.isAlive and not self.moneyRecorded:
-                    print("recorded")
                     self.document()
                     self.gamePlayed = True
             self.redrawAll(screen)
@@ -656,10 +563,8 @@ class PygameGame(object):
         self.userFile = open(f'userLogin/{self.userName}.txt', 'r')
         contents = self.userFile.read()
         currentPW = contents.splitlines()[0].strip()
-        print(currentPW)
         currentCoins = self.score // 10                
         totalCoins = currentCoins + self.money               
-        print(totalCoins)
         self.money = totalCoins
         currentHighScore = int(contents.splitlines()[3].strip())
         self.userFile.close()
@@ -672,7 +577,6 @@ class PygameGame(object):
         if self.score > currentHighScore:
             self.printNewRecord = True
             self.highestScore = self.score
-            print(self.highestScore)
         self.userFile.write(f'{self.highestScore}\r\n')
         self.userFile.close()
         deletePlayer = None
@@ -691,78 +595,19 @@ class PygameGame(object):
                 self.highScores[self.userName] = self.score
                 recorded = True
                 deletePlayer = player
-                print("replaced", self.highScores)
         if len(self.highScores) < 3 and not recorded:
             self.highScores[self.userName] = self.score
-            print("added", self.highScores)
         if deletePlayer != None:
             del self.highScores[deletePlayer]
-        '''
-        if self.score3 != "" and self.userName != self.name2 and self.userName != self.name1: #and self.userName != self.name3
-            if self.score > self.score3:
-                if self.score > self.score2:
-                    if self.score > self.score1:
-                        self.score3 = self.score2
-                        self.name3 = self.name2
-                        self.score2 = self.score1
-                        self.name2 = self.name1
-                        self.score1 = self.score
-                        self.name1 = self.userName
-                    else:
-                        self.score3 = self.score2
-                        self.name3 = self.name2
-                        self.score2 = self.score
-                        self.name2 = self.userName
-                elif self.userName != self.score3:
-                    self.score3 = self.score
-                    self.name3 = self.userName
-        elif self.score2 != "" and self.userName != self.name1: #and self.userName != self.name2
-            if self.score > self.score2:
-                if self.score > self.score1:
-                    self.score3 = self.score2
-                    self.name3 = self.name2
-                    self.score2 = self.score1
-                    self.name2 = self.name1
-                    self.score1 = self.score
-                    self.name1 = self.userName
-                else:
-                    self.score3 = self.score2
-                    self.name3 = self.name2
-                    self.score2 = self.score
-                    self.name2 = self.userName
-            elif self.userName != self.name2:
-                self.score3 = self.score
-                self.name3 = self.userName
-        elif self.score1 != "" and self.userName != self.name1:
-            if self.score > self.score1:
-                self.score2 = self.score1
-                self.name2 = self.name1
-                self.score1 = self.score
-                self.name1 = self.userName
-            else:
-                self.score2 = self.score
-                self.name2 = self.userName
-        elif self.userName != self.name1 or (self.userName == self.name1 and self.score > self.score1):
-            self.score1 = self.score
-            self.name1 = self.userName
-        elif self.userName == self.name2 and self.score > self.score2:
-            self.score2 = self.score
-        elif self.userName == self.name3 and self.score > self.score3:
-            self.score3 = self.score
-        '''
-        print(self.userName, self.score)
         self.scoreFile = open('scoreBoard.txt', "a")
         self.scoreFile.seek(0)
         self.scoreFile.truncate()
         # order the players based on their scores
-        print(len(self.highScores))
         self.scoreLst = []
         for name in self.highScores:
             self.scoreLst.append(self.highScores[name])
-        print(self.scoreLst)
         self.scoreLst.sort()
         self.scoreLst.reverse()
-        print("sorted", self.scoreLst)
         if len(self.scoreLst) > 0:
             self.score1 = self.scoreLst[0]
             if len(self.scoreLst) > 1:
@@ -783,26 +628,6 @@ class PygameGame(object):
         if self.name3 != "" and self.score3 != None:
             self.scoreFile.write(f'{self.name3},{self.score3}\r\n')
         self.scoreFile.close()
-        '''
-        self.scoreFile = open(f'scoreBoard.txt', 'r')
-        scoreContents = self.scoreFile.read()
-        numScores = len(contents.splitlines())
-        if numScores == 1:
-            self.name1 = (contents.splitlines()[0].split(","))[0]
-            self.score1 = (contents.splitlines()[0].split(","))[1]
-        elif numScores == 2:
-            self.name1 = (contents.splitlines()[0].split(","))[0]
-            self.score1 = (contents.splitlines()[0].split(","))[1]
-            self.name2 = (contents.splitlines()[1].split(","))[0]
-            self.score2 = (contents.splitlines()[1].split(","))[1]
-        elif numScores == 3:
-            self.name1 = (contents.splitlines()[0].split(","))[0]
-            self.score1 = (contents.splitlines()[0].split(","))[1]
-            self.name2 = (contents.splitlines()[1].split(","))[0]
-            self.score2 = (contents.splitlines()[1].split(","))[1]
-            self.name3 = (contents.splitlines()[2].split(","))[0]
-            self.score3 = (contents.splitlines()[2].split(","))[1]
-        '''
         self.moneyRecorded = True
 
 def main():

@@ -2,6 +2,8 @@ import pygame
 import math
 from gameObject import GameObject
 
+# This is the Lasers class that subclasses the GameObject class
+# import laser images and contain init and update methods
 class Lasers(GameObject):
     @staticmethod
     def init():

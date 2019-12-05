@@ -2,6 +2,8 @@ import pygame
 import math
 from gameObject import GameObject
 
+# this is the Magnet class that subclasses the GameObject class
+# import magnet image and contain init and update methods
 class Magnet(GameObject):
     @staticmethod
     def init():

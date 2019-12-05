@@ -1,6 +1,8 @@
 import pygame
 
-# framework taken from: https://github.com/LBPeraza/Pygame-Asteroids
+# modified framework taken from: https://github.com/LBPeraza/Pygame-Asteroids
+# this is the GameObject class
+# contains the basic and skeleton methods for all object classes
 class GameObject(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
         super(GameObject, self).__init__()
@@ -14,7 +16,6 @@ class GameObject(pygame.sprite.Sprite):
         self.angle = 0
 
     def updateRect(self):
-        #self.width, self.height = self.image.get_size()
         self.rect = pygame.Rect(self.x - self.width / 2, self.y - self.height / 2,
                                 self.width, self.height)
         

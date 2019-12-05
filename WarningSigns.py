@@ -2,6 +2,9 @@ import pygame
 import math
 from gameObject import GameObject
 
+# This is the WarningSigns class
+# import warning sign images
+# contain init and update methods for WarningSigns objects
 class WarningSigns(GameObject):
     @staticmethod
     def init():

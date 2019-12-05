@@ -1,9 +1,9 @@
 import pygame
 import math
 from gameObject import GameObject
-#from Hitboxes import Hitboxes
-#from Stars import Stars
 
+# This is the Coins class that subclasses the GameObject class
+# import coins and stars sprites and contain init and update methods
 class Coins(GameObject):
     @staticmethod
     def init():
@@ -27,13 +27,10 @@ class Coins(GameObject):
         Coins.count = 0
         Coins.heart = [(0, 0), (15, 0), (30, 0), (45, 0), (10, -15), (35, -15), (15, 15), (30, 15), (22.5, 30)]
         Coins.lines = [(0, 0), (15, 0), (30, 0), (45, 0), (60, 0), (75, 0), (90, 0)]
-        #               (0, 5), (5, 5), (10, 5), (15, 5), (20, 5), (25, 5), (30, 5)]
-        Coins.curves = []
 
     def __init__(self, x, y):
         self.image = Coins.sprite[0]
         width, height = self.image.get_size()
-        #self.hitbox = Hitboxes(x, y, width, height, "coins")
         self.scroll = 0
         self.scrollY = 0
         self.hit = False
@@ -41,7 +38,6 @@ class Coins(GameObject):
         self.past = False
         self.isVisible = False
         
-        #self.star = Stars(x + self.scroll, y)
         super(Coins, self).__init__(x, y, self.image)
 
     def update(self, screenWidth, screenHeight, playerX, playerY, playerMode):
@@ -61,15 +57,7 @@ class Coins(GameObject):
         if playerMode == "magnet suit" and self.isVisible:
             self.x -= (self.x - playerX) // 5
             self.y -= (self.y - playerY) // 5
-            #self.hitbox.x = self.x
-            #self.hitbox.y = self.y
-            #self.hitbox.update(screenWidth, screenHeight)
             self.scroll += (self.x - playerX) // 5
             self.scrollY += (self.y - playerY) // 5
-            #print(f"player, {playerX - 30 + self.scroll}, {playerY - 30 + self.scrollY}, {playerX + 30 + self.scroll},{playerY + 30 + self.scrollY}")
-            #print(f"playerX, Y: {playerX}, {playerY}")
-            #print(f"scrollX, scrollY: {self.scroll}, {self.scrollY}")
-            #print("hitbox", self.hitbox.x - self.hitbox.w / 2, self.hitbox.y - self.hitbox.h,
-            #      self.hitbox.x + self.hitbox.w / 2, self.hitbox.y + self.hitbox.y / 2)
         super(Coins, self).update(screenWidth, screenHeight, self.image)
 

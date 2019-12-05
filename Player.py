@@ -6,10 +6,13 @@ from Magnet import Magnet
 from Coins import Coins
 from Obstacles import Obstacles
 
+# This is the Player class that subclasses the GameObject class
+# import player sprites in different modes and contain init and update methods
+# contain player methods: collide and collideCoins
 class Player(GameObject):
     @staticmethod
     def init():
-        # all images taken from: https://bevouliin.com/game-character-green-fur-monster-sprite-sheets/
+        # all player images taken from: https://bevouliin.com/game-character-green-fur-monster-sprite-sheets/
         Player.fly = [pygame.image.load("flying/a1.png"),
                       pygame.image.load("flying/a2.png"),
                       pygame.image.load("flying/a3.png"),
@@ -38,12 +41,10 @@ class Player(GameObject):
         
     def __init__(self, x, y):
         super(Player, self).__init__(x, y, Player.image)
-        self.angle = 0
         self.timeAlive = 0
         self.isAlive = True
         self.acceleration = (0, 9.8*2.5) #accounts for gravity
         self.velocity = (0, 0)
-        #self.t = 1/30
         self.powerUp = False
         self.goingUp = False
         self.mode = "fly"
@@ -72,24 +73,19 @@ class Player(GameObject):
             self.count += 1
         else:
             if self.mode == "fly":
-                #print("fly mode entered", Player.count)
                 self.count += 1
                 if self.goingUp:
-                    #Player.count = Player.count % 2
                     Player.image = Player.fly[self.count % 8]
                 elif self.count % 2 == 0:
                     Player.image = Player.fly[(self.count // 2) % 8]
             elif self.mode == "attack":
-                #print("attack mode", self.count)
                 if self.count >= 2:
-                    #print("switching back to fly", Player.count)
                     self.mode = "fly"
                     self.count = 0
                 Player.image = Player.attack[(self.count % 3)]
                 self.count += 1
             elif self.mode == "magnet suit":
                 if self.count >= 130:
-                    #print("back to fly mode")
                     self.mode = "fly"
                     self.count = 0
                     self.magnet = None
@@ -105,22 +101,16 @@ class Player(GameObject):
                 self.goingUp = False
             if keysDown(pygame.K_UP):
                 self.powerUpCount = 0
-                #self.count = 7
                 self.powerUp = True
-            #if not keysDown(pygame.K_UP):
-                #vy += 15
             if keysDown(pygame.K_UP):
                 vy -= (16 - self.powerUpCount)
                 if self.powerUpCount <= 16:
                     self.powerUpCount += 2
                 if self.y - self.height / 2 < 0:
                     self.y = self.height / 2
-                    #vy = -5
                     
             if self.powerUp and vy >= 9.8 * 1.5:
                 self.powerUp = False
-            #if self.goingUp and vy >= 0:
-            #   self.goingUp = False
                 if self.mode == "fly":
                     self.count *= 2
             if self.goingUp:
@@ -153,19 +143,10 @@ class Player(GameObject):
             else:
                 (x0, y0, x1, y1) = (item.x - item.width / 2 , item.y - item.height / 2,
                                     item.x + item.width / 2 , item.y + item.height / 2)
-            '''
-            if isinstance(item, Coins):
-                (x0, y0, x1, y1) = (item.x - item.width / 2 + item.scroll, item.y - item.height / 2 + item.scrollY,
-                                    item.x + item.width / 2 + item.scroll, item.y + item.height / 2 + item.scrollY)
-            else:
-                (x0, y0, x1, y1) = item.hitbox.cors
-            '''
             (i0, j0, i1, j1) = (self.x - self.width / 2,
                                 self.y - self.height / 2,
                                 self.x + self.width / 2,
                                 self.y + self.height / 2)
-            #print((x0, y0, x1, y1),
-            #      (j0, j0, i1, j1))
             if ((i0 <= x1) and (x0 <= i1)) and ((y0 <= j1) and (j0 <= y1)):
                 return True, item
         return False, None
@@ -184,14 +165,6 @@ class Player(GameObject):
         if len(coins) > 0:
             return True, coins
         return False, None
-'''
-    def powerUp(self):
-        # perform power-up once
-        force = 10
-        time = clock.tick(self.fps)
-        self.timerFired(time)
-        self.powerUp = False
-'''
 
 
 

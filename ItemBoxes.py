@@ -2,6 +2,8 @@ import pygame
 import math
 from gameObject import GameObject
 
+# this is the ItemBoxes class
+# import item box image and contain init and update methods
 class ItemBoxes(GameObject):
     @staticmethod
     def init():
@@ -12,7 +14,6 @@ class ItemBoxes(GameObject):
         self.image = pygame.transform.scale(pygame.image.load("item box.png"),
                                             (60, 60))
         width, height = self.image.get_size()
-        #self.hitbox = Hitboxes(x, y, width, height, "item boxes")
         self.scroll = 0
         self.scrollY = 0
         self.hit = False

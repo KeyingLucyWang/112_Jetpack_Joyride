@@ -2,6 +2,9 @@ import pygame
 import math
 from gameObject import GameObject
 
+# This is the Bullets class that subclasses the GameObject class
+# import bullet image and explosion images
+# init and update() methods for Bullets
 class Bullets(GameObject):
     @staticmethod
     def init():
@@ -44,12 +47,5 @@ class Bullets(GameObject):
                             self.y + self.height / 2)
         if ((i0 <= x1) and (x0 <= i1)) and ((y0 <= j1) and (j0 <= y1)):
             self.hit = True
-            item.kill()
-'''
-    def update(self, dt, keysDown, screenWidth, screenHeight):
-        print("update")
-        self.x += 50
-        self.distanceTraveled += 50
-        super(Bullets, self).update(screenWidth, screenHeight, Bullets.image)
-'''         
+            item.kill()       
         
